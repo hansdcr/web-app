@@ -1,9 +1,65 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
+function HomeSidebar({ t }) {
+  return (
+    <>
+      <div className="sidebar-head">
+        <div className="search-box">{t('searchPlaceholder')}</div>
+        <button type="button" className="sidebar-plus" aria-label={t('homeSidebarAdd')}>
+          +
+        </button>
+      </div>
+      <div className="chat-item active">
+        <div className="avatar robot">{t('homeRobotIcon')}</div>
+        <div className="chat-meta">
+          <p className="chat-name">{t('homeAgentName')}</p>
+          <p className="chat-desc">{t('homeAgentDesc')}</p>
+        </div>
+      </div>
+      <div className="chat-item">
+        <div className="avatar friend">{t('homeFriendAvatar')}</div>
+        <div className="chat-meta">
+          <p className="chat-name">{t('homeFriendName')}</p>
+          <p className="chat-desc">{t('homeFriendPreview')}</p>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function HomePage({ t }) {
+  return (
+    <div className="home-map-layout">
+      <section className="map-surface full">
+        <div className="map-head map-head-floating">
+          <div>
+            <p className="map-title">{t('homeMapTitle')}</p>
+            <p className="map-subtitle">{t('homeMapSubtitle')}</p>
+          </div>
+          <button type="button" className="map-action">{t('homeMapAction')}</button>
+        </div>
+        {/* 地图为主视觉区域，先用静态样式占位，后续迭代接入真实地图 SDK。 */}
+        <div className="map-grid" />
+        <span className="map-marker marker-dufu">{t('homeMarkerDufu')}</span>
+        <span className="map-marker marker-liqingzhao">{t('homeMarkerLiqingzhao')}</span>
+        <span className="map-marker marker-lubunwei">{t('homeMarkerLuban')}</span>
+        <section className="map-input-dock">
+          <p className="map-input-title">{t('homeInputTitle')}</p>
+          <div className="map-input-row">
+            <span>{t('homeInputPlaceholder')}</span>
+            <button type="button" className="map-send-btn">{t('homePromptSend')}</button>
+          </div>
+        </section>
+      </section>
+    </div>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
+  const isHome = location.pathname === '/home'
   const isZh = i18n.language === 'zh-CN'
   const nextLocale = isZh ? 'en-US' : 'zh-CN'
   const railItems = [
@@ -36,7 +92,8 @@ function App() {
       </aside>
 
       <aside className="sidebar" aria-label="Conversation List">
-        <div className="search-box">{t('searchPlaceholder')}</div>
+        {/* Home 页使用专属侧栏内容，其他页面暂保留最小占位。 */}
+        {isHome ? <HomeSidebar t={t} /> : <div className="search-box">{t('searchPlaceholder')}</div>}
       </aside>
 
       <main className="main" aria-label="Main Content">
@@ -51,10 +108,10 @@ function App() {
             {isZh ? 'EN' : '中'}
           </button>
         </header>
-        <section className="main-content">
+        <section className={`main-content ${isHome ? 'is-home' : ''}`}>
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
-            <Route path="/home" element={<div className="route-placeholder">{t('pageHome')}</div>} />
+            <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<div className="route-placeholder">{t('pageChat')}</div>} />
             <Route path="/discover" element={<div className="route-placeholder">{t('pageDiscover')}</div>} />
             <Route path="/contacts" element={<div className="route-placeholder">{t('pageContacts')}</div>} />
