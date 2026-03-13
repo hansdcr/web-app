@@ -117,11 +117,55 @@ function ChatPage({ t }) {
   )
 }
 
+function DiscoverPage({ t }) {
+  const cardKeys = [
+    'dailyNews',
+    'smartPhoto',
+    'shareMovie',
+    'eatTogether',
+    'shareAi',
+    'dailyGym',
+    'dailyReading',
+    'dailyStock',
+    'languageStudy',
+    'generateImages',
+    'shareMusic',
+    'shareSports',
+  ]
+
+  return (
+    <div className="discover-page">
+      <section className="discover-section">
+        <div className="discover-section-head">
+          <h2>{t('discoverTrendingGroups')}</h2>
+          <button type="button">{t('discoverViewAll')}</button>
+        </div>
+        <div className="discover-grid">
+          {cardKeys.map((key, index) => (
+            <article key={key} className="discover-card">
+              <div className={`discover-cover discover-cover-${index + 1}`} />
+              <div className="discover-body">
+                <div className="discover-body-head">
+                  <p>{t(`discoverCard.${key}.title`)}</p>
+                  <span>{t('discoverJoin')}</span>
+                </div>
+                <p>{t(`discoverCard.${key}.desc`)}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+      <section className="discover-footer-title">{t('discoverRecommendedAgents')}</section>
+    </div>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
+  const isDiscover = location.pathname === '/discover'
   const isZh = i18n.language === 'zh-CN'
   const nextLocale = isZh ? 'en-US' : 'zh-CN'
   const railItems = [
@@ -133,7 +177,7 @@ function App() {
   const currentTitle = railItems.find((item) => item.path === location.pathname)?.label ?? t('topbarTitle')
 
   return (
-    <div className="web-shell">
+    <div className={`web-shell ${isDiscover ? 'is-discover-shell' : ''}`}>
       <aside className="rail" aria-label={t('railAria')}>
         <NavLink to="/home" className="rail-brand" aria-label={t('railHome')}>
           {t('railBrand')}
@@ -159,6 +203,8 @@ function App() {
           <HomeSidebar t={t} />
         ) : isChat ? (
           <ChatSidebar t={t} />
+        ) : isDiscover ? (
+          <></>
         ) : (
           <div className="search-box">{t('searchPlaceholder')}</div>
         )}
@@ -174,6 +220,15 @@ function App() {
               </div>
               <span className="chat-topbar-menu">...</span>
             </div>
+          ) : isDiscover ? (
+            <div className="discover-topbar">
+              <span>{t('railDiscover')}</span>
+              <div className="discover-tabs">
+                <button type="button" className="active">{t('discoverTabGroups')}</button>
+                <button type="button">{t('discoverTabAgents')}</button>
+                <button type="button">{t('discoverTabPlaybooks')}</button>
+              </div>
+            </div>
           ) : (
             <>
               <span>{currentTitle}</span>
@@ -188,12 +243,14 @@ function App() {
             </>
           )}
         </header>
-        <section className={`main-content ${isHome ? 'is-home' : ''} ${isChat ? 'is-chat' : ''}`}>
+        <section
+          className={`main-content ${isHome ? 'is-home' : ''} ${isChat ? 'is-chat' : ''} ${isDiscover ? 'is-discover' : ''}`}
+        >
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<ChatPage t={t} />} />
-            <Route path="/discover" element={<div className="route-placeholder">{t('pageDiscover')}</div>} />
+            <Route path="/discover" element={<DiscoverPage t={t} />} />
             <Route path="/contacts" element={<div className="route-placeholder">{t('pageContacts')}</div>} />
             <Route path="/create" element={<div className="route-placeholder">{t('pageCreate')}</div>} />
           </Routes>
