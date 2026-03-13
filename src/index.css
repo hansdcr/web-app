@@ -25,32 +25,64 @@ body {
 .web-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 42px 180px 1fr;
+  grid-template-columns: 72px 228px 1fr;
 }
 
 .rail {
   border-right: 1px solid var(--line);
   background: #f8fafc;
-  display: grid;
-  place-items: start center;
-  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  gap: 16px;
 }
 
 .rail-brand {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
   background: var(--brand);
   color: #ffffff;
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 600;
   display: grid;
   place-items: center;
+}
+
+.rail-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.rail-icon {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  font-size: 17px;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.rail-icon:hover {
+  background: #eef2f7;
+}
+
+.rail-icon.active {
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .sidebar {
   border-right: 1px solid var(--line);
   background: var(--panel);
-  padding: 10px 8px;
+  padding: 12px 12px;
 }
 
 .search-box {
@@ -72,14 +104,14 @@ body {
 }
 
 .topbar {
-  height: 42px;
+  height: 48px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 12px;
-  font-size: 18px;
+  padding: 0 16px;
+  font-size: 20px;
   font-weight: 600;
 }
 

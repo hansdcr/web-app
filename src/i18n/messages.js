@@ -1,6 +1,11 @@
 export const messages = {
   'zh-CN': {
     railBrand: 'AI',
+    railAria: '主导航',
+    railChat: '聊天',
+    railDiscover: '发现',
+    railContacts: '联系人',
+    railCreate: '创建',
     searchPlaceholder: '搜索',
     topbarTitle: 'Cultural AI',
     localeLabel: '语言',
@@ -8,6 +13,11 @@ export const messages = {
   },
   'en-US': {
     railBrand: 'AI',
+    railAria: 'Primary Navigation',
+    railChat: 'Chat',
+    railDiscover: 'Discover',
+    railContacts: 'Contacts',
+    railCreate: 'Create',
     searchPlaceholder: 'Search',
     topbarTitle: 'Cultural AI',
     localeLabel: 'Language',
