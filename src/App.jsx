@@ -17,7 +17,9 @@ function App() {
   return (
     <div className="web-shell">
       <aside className="rail" aria-label={t('railAria')}>
-        <div className="rail-brand">{t('railBrand')}</div>
+        <NavLink to="/home" className="rail-brand" aria-label={t('railHome')}>
+          {t('railBrand')}
+        </NavLink>
         <div className="rail-nav">
           {/* 迭代 4：接入真实路由，激活态由 URL 自动驱动。 */}
           {railItems.map((item) => (
@@ -52,6 +54,7 @@ function App() {
         <section className="main-content">
           <Routes>
             <Route path="/" element={<Navigate to="/chat" replace />} />
+            <Route path="/home" element={<div className="route-placeholder">{t('pageHome')}</div>} />
             <Route path="/chat" element={<div className="route-placeholder">{t('pageChat')}</div>} />
             <Route path="/discover" element={<div className="route-placeholder">{t('pageDiscover')}</div>} />
             <Route path="/contacts" element={<div className="route-placeholder">{t('pageContacts')}</div>} />
