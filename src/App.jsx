@@ -53,7 +53,7 @@ function App() {
         </header>
         <section className="main-content">
           <Routes>
-            <Route path="/" element={<Navigate to="/chat" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<div className="route-placeholder">{t('pageHome')}</div>} />
             <Route path="/chat" element={<div className="route-placeholder">{t('pageChat')}</div>} />
             <Route path="/discover" element={<div className="route-placeholder">{t('pageDiscover')}</div>} />
