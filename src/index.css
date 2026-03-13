@@ -296,6 +296,14 @@ body {
   width: 100%;
 }
 
+.main-content.is-contacts {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  height: calc(100vh - 48px);
+}
+
 .route-placeholder {
   color: var(--muted);
   font-size: 16px;
@@ -400,6 +408,123 @@ body {
   font-size: 24px;
   line-height: 1.1;
   font-weight: 700;
+}
+
+.contacts-sidebar {
+  height: 100%;
+}
+
+.contacts-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.contacts-sidebar-head h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+}
+
+.contacts-sidebar-head button {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.contacts-sidebar-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.contacts-sidebar-tabs button {
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  text-align: left;
+  padding: 0 10px;
+  background: transparent;
+  color: #334155;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.contacts-sidebar-tabs button.active {
+  background: #ecfdf5;
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.contacts-topbar {
+  width: 100%;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.contacts-page {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  padding: 10px 6px 10px 16px;
+}
+
+.contacts-list {
+  max-width: 520px;
+  margin-left: 0;
+}
+
+.contacts-group {
+  margin-bottom: 12px;
+}
+
+.contacts-letter {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.contacts-items {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.contacts-row {
+  height: 38px;
+  border-radius: 8px;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #111827;
+  font-size: 15px;
+}
+
+.contacts-row.active {
+  background: #f1f5f9;
+}
+
+.contacts-row-icon {
+  color: #9333ea;
+  font-size: 15px;
+}
+
+.contacts-index {
+  position: absolute;
+  right: 10px;
+  top: 45%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #94a3b8;
+  letter-spacing: 0.2em;
+  writing-mode: vertical-rl;
 }
 
 .chat-page {

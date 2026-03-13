@@ -160,12 +160,62 @@ function DiscoverPage({ t }) {
   )
 }
 
+function ContactsSidebar({ t }) {
+  return (
+    <div className="contacts-sidebar">
+      <div className="contacts-sidebar-head">
+        <h2>{t('contactsTitle')}</h2>
+        <button type="button" aria-label={t('contactsAdd')}>+</button>
+      </div>
+      <div className="contacts-sidebar-tabs">
+        <button type="button" className="active">{t('contactsTabAgents')}</button>
+        <button type="button">{t('contactsTabFriends')}</button>
+        <button type="button">{t('contactsTabRequests')}</button>
+      </div>
+    </div>
+  )
+}
+
+function ContactsPage({ t }) {
+  const groups = [
+    { letter: 'A', items: ['Accounting Assistant', 'AI Stock Assistant'] },
+    { letter: 'F', items: ['Finance Assistant'] },
+    { letter: 'H', items: ['Health Assistant'] },
+    { letter: 'M', items: ['Market Research'] },
+    { letter: 'S', items: ['Slides Assistant'] },
+    { letter: 'T', items: ['Travel Planner'] },
+    { letter: 'W', items: ['Webpage Developer'] },
+  ]
+
+  return (
+    <div className="contacts-page">
+      <div className="contacts-list">
+        {groups.map((group) => (
+          <section key={group.letter} className="contacts-group">
+            <p className="contacts-letter">{group.letter}</p>
+            <div className="contacts-items">
+              {group.items.map((item) => (
+                <div key={item} className={`contacts-row ${item === 'Travel Planner' ? 'active' : ''}`}>
+                  <span className="contacts-row-icon">✦</span>
+                  <span>{t(`contactsItem.${item}`)}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+      <div className="contacts-index">A F H M S T W</div>
+    </div>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
   const isDiscover = location.pathname === '/discover'
+  const isContacts = location.pathname === '/contacts'
   const isZh = i18n.language === 'zh-CN'
   const nextLocale = isZh ? 'en-US' : 'zh-CN'
   const railItems = [
@@ -203,6 +253,8 @@ function App() {
           <HomeSidebar t={t} />
         ) : isChat ? (
           <ChatSidebar t={t} />
+        ) : isContacts ? (
+          <ContactsSidebar t={t} />
         ) : isDiscover ? (
           <></>
         ) : (
@@ -229,6 +281,8 @@ function App() {
                 <button type="button">{t('discoverTabPlaybooks')}</button>
               </div>
             </div>
+          ) : isContacts ? (
+            <div className="contacts-topbar">{t('contactsMainTitle')}</div>
           ) : (
             <>
               <span>{currentTitle}</span>
@@ -244,14 +298,14 @@ function App() {
           )}
         </header>
         <section
-          className={`main-content ${isHome ? 'is-home' : ''} ${isChat ? 'is-chat' : ''} ${isDiscover ? 'is-discover' : ''}`}
+          className={`main-content ${isHome ? 'is-home' : ''} ${isChat ? 'is-chat' : ''} ${isDiscover ? 'is-discover' : ''} ${isContacts ? 'is-contacts' : ''}`}
         >
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<ChatPage t={t} />} />
             <Route path="/discover" element={<DiscoverPage t={t} />} />
-            <Route path="/contacts" element={<div className="route-placeholder">{t('pageContacts')}</div>} />
+            <Route path="/contacts" element={<ContactsPage t={t} />} />
             <Route path="/create" element={<div className="route-placeholder">{t('pageCreate')}</div>} />
           </Routes>
         </section>
