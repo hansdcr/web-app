@@ -47,7 +47,6 @@ function HomePage({ t }) {
       </section>
       {/* Home 页采用上下结构：上方地图主视觉 + 下方输入区域。 */}
       <section className="home-input-panel">
-        <p className="map-input-title">{t('homeInputTitle')}</p>
         <div className="map-input-row">
           <span>{t('homeInputPlaceholder')}</span>
           <button type="button" className="map-send-btn">{t('homePromptSend')}</button>
