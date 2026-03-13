@@ -44,13 +44,14 @@ function HomePage({ t }) {
         <span className="map-marker marker-dufu">{t('homeMarkerDufu')}</span>
         <span className="map-marker marker-liqingzhao">{t('homeMarkerLiqingzhao')}</span>
         <span className="map-marker marker-lubunwei">{t('homeMarkerLuban')}</span>
-        <section className="map-input-dock">
-          <p className="map-input-title">{t('homeInputTitle')}</p>
-          <div className="map-input-row">
-            <span>{t('homeInputPlaceholder')}</span>
-            <button type="button" className="map-send-btn">{t('homePromptSend')}</button>
-          </div>
-        </section>
+      </section>
+      {/* Home 页采用上下结构：上方地图主视觉 + 下方输入区域。 */}
+      <section className="home-input-panel">
+        <p className="map-input-title">{t('homeInputTitle')}</p>
+        <div className="map-input-row">
+          <span>{t('homeInputPlaceholder')}</span>
+          <button type="button" className="map-send-btn">{t('homePromptSend')}</button>
+        </div>
       </section>
     </div>
   )
