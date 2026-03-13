@@ -329,6 +329,11 @@ body {
   gap: 8px;
 }
 
+.chat-link-item {
+  text-decoration: none;
+  color: inherit;
+}
+
 .chat-item.active {
   background: #22c55e;
   color: #ffffff;

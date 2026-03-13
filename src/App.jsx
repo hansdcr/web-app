@@ -18,13 +18,13 @@ function HomeSidebar({ t }) {
           <p className="chat-desc">{t('homeAgentDesc')}</p>
         </div>
       </div>
-      <div className="chat-item">
+      <NavLink to="/chat" className="chat-item chat-link-item" aria-label={t('homeFriendName')}>
         <div className="avatar friend">{t('homeFriendAvatar')}</div>
         <div className="chat-meta">
           <p className="chat-name">{t('homeFriendName')}</p>
           <p className="chat-desc">{t('homeFriendPreview')}</p>
         </div>
-      </div>
+      </NavLink>
     </>
   )
 }
@@ -38,12 +38,12 @@ function ChatSidebar({ t, onOpenProfile }) {
           +
         </button>
       </div>
-      <div className="chat-item">
+      <NavLink to="/home" className="chat-item chat-link-item" aria-label={t('chatAgentName')}>
         <div className="avatar robot">{t('chatRobotIcon')}</div>
         <div className="chat-meta">
           <p className="chat-name">{t('chatAgentName')}</p>
         </div>
-      </div>
+      </NavLink>
       <div className="chat-item active">
         <button type="button" className="avatar-trigger" onClick={onOpenProfile} aria-label={t('chatFriendName')}>
           <div className="avatar friend">{t('chatFriendAvatar')}</div>
