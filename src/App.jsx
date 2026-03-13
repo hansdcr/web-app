@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 
@@ -28,7 +29,7 @@ function HomeSidebar({ t }) {
   )
 }
 
-function ChatSidebar({ t }) {
+function ChatSidebar({ t, onOpenProfile }) {
   return (
     <>
       <div className="sidebar-head">
@@ -44,7 +45,9 @@ function ChatSidebar({ t }) {
         </div>
       </div>
       <div className="chat-item active">
-        <div className="avatar friend">{t('chatFriendAvatar')}</div>
+        <button type="button" className="avatar-trigger" onClick={onOpenProfile} aria-label={t('chatFriendName')}>
+          <div className="avatar friend">{t('chatFriendAvatar')}</div>
+        </button>
         <div className="chat-meta">
           <p className="chat-name">{t('chatFriendName')}</p>
           <p className="chat-desc">{t('chatFriendPreview')}</p>
@@ -209,8 +212,34 @@ function ContactsPage({ t }) {
   )
 }
 
+function ChatProfileDrawer({ t, onClose }) {
+  return (
+    <div className="profile-overlay" role="dialog" aria-modal="true">
+      <button type="button" className="profile-backdrop" onClick={onClose} aria-label={t('chatProfileClose')} />
+      <aside className="profile-drawer">
+        <button type="button" className="profile-close" onClick={onClose} aria-label={t('chatProfileClose')}>×</button>
+        <div className="profile-head">
+          <div className="profile-avatar">{t('chatFriendAvatar')}</div>
+          <h3>{t('chatFriendName')}</h3>
+          <p>{t('chatProfileEmail')}</p>
+        </div>
+        <button type="button" className="profile-primary">{t('chatProfileCreateGroup')}</button>
+        <div className="profile-list">
+          <button type="button">{t('chatProfileSetRemark')}</button>
+          <button type="button">{t('chatProfileMute')}</button>
+          <button type="button">{t('chatProfilePinTop')}</button>
+          <button type="button">{t('chatProfileBlockUser')}</button>
+          <button type="button" className="danger-text">{t('chatProfileClearHistory')}</button>
+        </div>
+        <button type="button" className="profile-danger">{t('chatProfileDeleteFriend')}</button>
+      </aside>
+    </div>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
@@ -252,7 +281,7 @@ function App() {
         {isHome ? (
           <HomeSidebar t={t} />
         ) : isChat ? (
-          <ChatSidebar t={t} />
+          <ChatSidebar t={t} onOpenProfile={() => setIsProfileOpen(true)} />
         ) : isContacts ? (
           <ContactsSidebar t={t} />
         ) : isDiscover ? (
@@ -267,7 +296,14 @@ function App() {
           {isChat ? (
             <div className="chat-topbar">
               <div className="chat-topbar-user">
-                <span className="chat-topbar-avatar">{t('chatFriendAvatar')}</span>
+                <button
+                  type="button"
+                  className="chat-topbar-avatar-btn"
+                  onClick={() => setIsProfileOpen(true)}
+                  aria-label={t('chatFriendName')}
+                >
+                  <span className="chat-topbar-avatar">{t('chatFriendAvatar')}</span>
+                </button>
                 <span>{t('chatFriendName')}</span>
               </div>
               <span className="chat-topbar-menu">...</span>
@@ -310,6 +346,7 @@ function App() {
           </Routes>
         </section>
       </main>
+      {isChat && isProfileOpen ? <ChatProfileDrawer t={t} onClose={() => setIsProfileOpen(false)} /> : null}
     </div>
   )
 }

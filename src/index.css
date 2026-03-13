@@ -223,9 +223,23 @@ body {
   font-size: 12px;
 }
 
+.chat-topbar-avatar-btn {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
 .chat-topbar-menu {
   color: #94a3b8;
   font-size: 18px;
+}
+
+.avatar-trigger {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 
 .discover-topbar {
@@ -628,6 +642,112 @@ body {
   display: grid;
   place-items: center;
   font-size: 11px;
+}
+
+.profile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.profile-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.profile-drawer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 320px;
+  background: #ffffff;
+  border-left: 1px solid var(--line);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-close {
+  align-self: flex-end;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.profile-head {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 78px;
+  height: 78px;
+  margin: 4px auto 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #334155;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+
+.profile-head h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.profile-head p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.profile-primary {
+  margin-top: 14px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #15803d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-list button {
+  height: 40px;
+  border: 0;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #334155;
+  text-align: left;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.profile-list .danger-text {
+  color: #ef4444;
+}
+
+.profile-danger {
+  margin-top: auto;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .home-map-layout {
