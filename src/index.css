@@ -2,9 +2,17 @@
   --bg: #f3f5f7;
   --panel: #ffffff;
   --line: #e5e7eb;
+  --line-soft: #edf2f7;
   --text: #111827;
   --muted: #6b7280;
   --brand: #22c55e;
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --shadow-card: 0 8px 20px rgba(15, 23, 42, 0.08);
+  --shadow-pop: 0 14px 30px rgba(15, 23, 42, 0.14);
 }
 
 * {
@@ -112,9 +120,9 @@ body {
   bottom: 0;
   width: 178px;
   border: 1px solid #fecaca;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: #ffffff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow-pop);
   padding: 10px;
   transform-origin: left bottom;
   animation: wallet-pop-in 160ms ease-out;
@@ -189,9 +197,9 @@ body {
   bottom: -6px;
   width: 190px;
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: #ffffff;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow-pop);
   padding: 8px;
   z-index: 10;
   animation: wallet-pop-in 160ms ease-out;
@@ -267,7 +275,7 @@ body {
   width: 40px;
   height: 40px;
   border: 0;
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   background: transparent;
   font-size: 17px;
   color: var(--muted);
@@ -306,7 +314,7 @@ body {
   width: 28px;
   height: 28px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   background: #f1f5f9;
   color: var(--muted);
   cursor: pointer;
@@ -315,7 +323,7 @@ body {
 .chat-item {
   margin-top: 10px;
   padding: 8px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -394,7 +402,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
 }
 
@@ -525,7 +533,7 @@ body {
 }
 
 .discover-page {
-  padding: 14px 16px 18px;
+  padding: 16px 18px 20px;
 }
 
 .discover-section-head {
@@ -537,7 +545,7 @@ body {
 
 .discover-section-head h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1.1;
 }
 
@@ -552,14 +560,15 @@ body {
 .discover-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .discover-card {
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: #ffffff;
+  box-shadow: var(--shadow-card);
 }
 
 .discover-cover {
@@ -620,7 +629,7 @@ body {
 
 .discover-footer-title {
   margin-top: 14px;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1.1;
   font-weight: 700;
 }
@@ -638,7 +647,7 @@ body {
 
 .contacts-sidebar-head h2 {
   margin: 0;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1.1;
 }
 
@@ -661,7 +670,7 @@ body {
 .contacts-sidebar-tabs button {
   height: 40px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   text-align: left;
   padding: 0 10px;
   background: transparent;
@@ -713,7 +722,7 @@ body {
 
 .contacts-row {
   height: 38px;
-  border-radius: 8px;
+  border-radius: var(--radius-xs);
   padding: 0 10px;
   display: flex;
   align-items: center;
@@ -794,7 +803,7 @@ body {
   width: fit-content;
   font-size: 12px;
   line-height: 1.45;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
 }
 
@@ -815,7 +824,7 @@ body {
   bottom: 12px;
   height: 42px;
   border-radius: 999px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-soft);
   background: #ffffff;
   padding: 0 12px;
   display: flex;
@@ -866,7 +875,7 @@ body {
   width: 426px;
   background: #ffffff;
   border-left: 1px solid var(--line);
-  padding: 14px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
 }
@@ -915,6 +924,7 @@ body {
   background: #f0fdf4;
   color: #15803d;
   font-weight: 600;
+  box-shadow: var(--shadow-card);
   cursor: pointer;
 }
 
@@ -928,7 +938,7 @@ body {
 .profile-list button {
   height: 40px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: #f8fafc;
   color: #334155;
   text-align: left;
@@ -1057,11 +1067,11 @@ body {
   width: min(920px, calc(100% - 64px));
   margin: 8px auto 14px;
   border: 1px solid #e2e8f0;
-  border-radius: 30px;
+  border-radius: 28px;
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(8px);
   padding: 18px 20px 20px;
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .composer-prompt {
