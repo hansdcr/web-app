@@ -256,10 +256,35 @@ function WalletPopover({ t }) {
   )
 }
 
+function PersonalMenuPopover({ t }) {
+  return (
+    <section className="personal-pop">
+      <div className="personal-account">
+        <div className="personal-avatar">{t('personalInitial')}</div>
+        <div>
+          <p>{t('personalAccount')}</p>
+          <span>{t('personalEmail')}</span>
+        </div>
+      </div>
+      <div className="personal-menu">
+        <button type="button">{t('personalSettings')}</button>
+        <button type="button">{t('personalInviteFriends')}</button>
+        <button type="button">{t('personalAbout')}</button>
+        <button type="button">{t('personalPricing')}</button>
+        <button type="button">{t('personalRefundPolicy')}</button>
+        <button type="button">{t('personalTerms')}</button>
+        <button type="button">{t('personalPrivacy')}</button>
+      </div>
+      <button type="button" className="personal-logout">{t('personalLogout')}</button>
+    </section>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWalletOpen, setIsWalletOpen] = useState(false)
+  const [isPersonalOpen, setIsPersonalOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
@@ -295,16 +320,29 @@ function App() {
           ))}
         </div>
         <div className="rail-footer">
-          <button
-            type="button"
-            className="wallet-trigger"
-            onClick={() => setIsWalletOpen((prev) => !prev)}
-            aria-label={t('walletTrigger')}
-          >
-            💎
-          </button>
-          <span className="wallet-count">{t('walletTriggerCount')}</span>
-          {isWalletOpen ? <WalletPopover t={t} /> : null}
+          <div className="wallet-wrap">
+            <button
+              type="button"
+              className="wallet-trigger"
+              onClick={() => setIsWalletOpen((prev) => !prev)}
+              aria-label={t('walletTrigger')}
+            >
+              💎
+            </button>
+            <span className="wallet-count">{t('walletTriggerCount')}</span>
+            {isWalletOpen ? <WalletPopover t={t} /> : null}
+          </div>
+          <div className="personal-wrap">
+            <button
+              type="button"
+              className="personal-trigger"
+              onClick={() => setIsPersonalOpen((prev) => !prev)}
+              aria-label={t('personalTrigger')}
+            >
+              {t('personalInitial')}
+            </button>
+            {isPersonalOpen ? <PersonalMenuPopover t={t} /> : null}
+          </div>
         </div>
       </aside>
 

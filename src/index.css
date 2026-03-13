@@ -64,12 +64,19 @@ body {
 
 .rail-footer {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.wallet-wrap,
+.personal-wrap {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding-bottom: 10px;
 }
 
 .wallet-trigger {
@@ -86,6 +93,17 @@ body {
 .wallet-count {
   font-size: 10px;
   color: #16a34a;
+}
+
+.personal-trigger {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .wallet-pop {
@@ -163,6 +181,86 @@ body {
   margin-top: 8px;
   cursor: pointer;
   padding: 0;
+}
+
+.personal-pop {
+  position: absolute;
+  left: 34px;
+  bottom: -6px;
+  width: 190px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.14);
+  padding: 8px;
+  z-index: 10;
+  animation: wallet-pop-in 160ms ease-out;
+}
+
+.personal-account {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.personal-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #16a34a;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+}
+
+.personal-account p {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.personal-account span {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.personal-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 4px;
+}
+
+.personal-menu button {
+  border: 0;
+  background: transparent;
+  color: #334155;
+  height: 22px;
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 0 6px;
+}
+
+.personal-menu button:hover {
+  background: #f8fafc;
+}
+
+.personal-logout {
+  margin-top: 6px;
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  width: 100%;
+  background: transparent;
+  color: #ef4444;
+  text-align: left;
+  padding: 6px;
+  font-size: 11px;
+  cursor: pointer;
 }
 
 .rail-icon {
