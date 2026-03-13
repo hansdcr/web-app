@@ -6,7 +6,10 @@ function HomeSidebar({ t }) {
   return (
     <>
       <div className="sidebar-head">
-        <div className="search-box">{t('searchPlaceholder')}</div>
+        <label className="search-box">
+          <span className="search-icon">⌕</span>
+          <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
+        </label>
         <button type="button" className="sidebar-plus" aria-label={t('homeSidebarAdd')}>
           +
         </button>
@@ -33,7 +36,10 @@ function ChatSidebar({ t, onOpenProfile }) {
   return (
     <>
       <div className="sidebar-head">
-        <div className="search-box">{t('searchPlaceholder')}</div>
+        <label className="search-box">
+          <span className="search-icon">⌕</span>
+          <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
+        </label>
         <button type="button" className="sidebar-plus" aria-label={t('chatSidebarAdd')}>
           +
         </button>
@@ -357,7 +363,10 @@ function App() {
         ) : isDiscover ? (
           <></>
         ) : (
-          <div className="search-box">{t('searchPlaceholder')}</div>
+          <label className="search-box">
+            <span className="search-icon">⌕</span>
+            <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
+          </label>
         )}
       </aside>
 

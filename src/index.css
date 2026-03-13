@@ -387,10 +387,101 @@ body {
   border-radius: 16px;
   background: #f8fafc;
   padding: 0 10px;
-  display: grid;
+  display: flex;
   align-items: center;
+  gap: 6px;
   color: var(--muted);
   font-size: 12px;
+}
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.search-input {
+  flex: 1;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: #334155;
+  font-size: 12px;
+  min-width: 0;
+}
+
+.search-box:focus-within {
+  border-color: #86efac;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18);
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+/* 迭代 13：统一交互反馈，确保 hover 与键盘焦点可见。 */
+.rail-icon,
+.rail-brand,
+.sidebar-plus,
+.discover-tabs button,
+.discover-section-head button,
+.contacts-sidebar-head button,
+.contacts-sidebar-tabs button,
+.map-action,
+.composer-send,
+.chat-topbar-avatar-btn,
+.avatar-trigger,
+.wallet-trigger,
+.personal-trigger,
+.wallet-head button,
+.wallet-detail,
+.personal-menu button,
+.personal-logout,
+.profile-close,
+.profile-primary,
+.profile-list button,
+.profile-danger,
+.chat-input-bar {
+  transition: all 140ms ease;
+}
+
+.rail-brand:hover,
+.sidebar-plus:hover,
+.discover-tabs button:hover,
+.discover-section-head button:hover,
+.contacts-sidebar-head button:hover,
+.contacts-sidebar-tabs button:hover,
+.map-action:hover,
+.wallet-trigger:hover,
+.personal-trigger:hover,
+.wallet-head button:hover,
+.profile-primary:hover,
+.profile-danger:hover {
+  filter: brightness(0.97);
+}
+
+.rail-icon:focus-visible,
+.rail-brand:focus-visible,
+.sidebar-plus:focus-visible,
+.discover-tabs button:focus-visible,
+.discover-section-head button:focus-visible,
+.contacts-sidebar-head button:focus-visible,
+.contacts-sidebar-tabs button:focus-visible,
+.map-action:focus-visible,
+.composer-send:focus-visible,
+.chat-topbar-avatar-btn:focus-visible,
+.avatar-trigger:focus-visible,
+.wallet-trigger:focus-visible,
+.personal-trigger:focus-visible,
+.wallet-head button:focus-visible,
+.wallet-detail:focus-visible,
+.personal-menu button:focus-visible,
+.personal-logout:focus-visible,
+.profile-close:focus-visible,
+.profile-primary:focus-visible,
+.profile-list button:focus-visible,
+.profile-danger:focus-visible {
+  outline: 2px solid rgba(34, 197, 94, 0.5);
+  outline-offset: 2px;
 }
 
 .main {
