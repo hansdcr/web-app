@@ -237,9 +237,29 @@ function ChatProfileDrawer({ t, onClose }) {
   )
 }
 
+function WalletPopover({ t }) {
+  return (
+    <section className="wallet-pop">
+      <div className="wallet-head">
+        <p>{t('walletPlan')}</p>
+        <button type="button">{t('walletUpgrade')}</button>
+      </div>
+      <div className="wallet-lines">
+        <div><span>{t('walletCredits')}</span><strong>{t('walletValueCredits')}</strong></div>
+        <div><span>{t('walletSubscription')}</span><span>{t('walletValueSubscription')}</span></div>
+        <div><span>{t('walletDailyCredit')}</span><span>{t('walletValueDailyCredit')}</span></div>
+        <div><span>{t('walletNewUser')}</span><strong>{t('walletValueNewUser')}</strong></div>
+        <div><span>{t('walletPurchased')}</span><span>{t('walletValuePurchased')}</span></div>
+      </div>
+      <button type="button" className="wallet-detail">{t('walletUsageDetails')}</button>
+    </section>
+  )
+}
+
 function App() {
   const { t, i18n } = useTranslation()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isWalletOpen, setIsWalletOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
@@ -273,6 +293,18 @@ function App() {
               <span aria-hidden="true">{item.icon}</span>
             </NavLink>
           ))}
+        </div>
+        <div className="rail-footer">
+          <button
+            type="button"
+            className="wallet-trigger"
+            onClick={() => setIsWalletOpen((prev) => !prev)}
+            aria-label={t('walletTrigger')}
+          >
+            💎
+          </button>
+          <span className="wallet-count">{t('walletTriggerCount')}</span>
+          {isWalletOpen ? <WalletPopover t={t} /> : null}
         </div>
       </aside>
 
