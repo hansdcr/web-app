@@ -75,11 +75,23 @@ body {
   height: 42px;
   border-bottom: 1px solid var(--line);
   background: var(--panel);
-  display: grid;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 12px;
   font-size: 18px;
   font-weight: 600;
+}
+
+.locale-btn {
+  height: 26px;
+  min-width: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #f8fafc;
+  color: var(--muted);
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .main-content {
