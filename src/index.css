@@ -1242,3 +1242,83 @@ body {
   font-size: 12px;
   cursor: pointer;
 }
+
+/* 真实聊天输入框样式 */
+.chat-input-bar-real {
+  position: fixed;
+  bottom: 0;
+  left: 300px;
+  right: 0;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  padding: 16px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  z-index: 10;
+}
+
+.chat-input-field {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.chat-input-field:focus {
+  border-color: var(--brand);
+}
+
+.chat-input-field:disabled {
+  background: var(--line-soft);
+  cursor: not-allowed;
+}
+
+.chat-send-btn {
+  border: 0;
+  background: var(--brand);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.chat-send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.typing-indicator {
+  animation: typing 1.4s infinite;
+}
+
+@keyframes typing {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* 调整聊天区域底部padding，为输入框留出空间 */
+.chat-stage {
+  padding-bottom: 80px;
+}

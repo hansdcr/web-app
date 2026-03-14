@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import ChatPage from './components/ChatPage'
 
 function HomeSidebar({ t }) {
   return (
@@ -93,38 +94,7 @@ function HomePage({ t }) {
   )
 }
 
-function ChatPage({ t }) {
-  return (
-    <div className="chat-page">
-      <div className="chat-stage">
-        <div className="chat-row left">
-          <span className="chat-msg-avatar friend">{t('chatFriendAvatar')}</span>
-          <div className="chat-bubble left">{t('chatBubble1')}</div>
-        </div>
-        <div className="chat-row right">
-          <div className="chat-bubble right">{t('chatBubble2')}</div>
-          <span className="chat-msg-avatar self">{t('chatSelfAvatar')}</span>
-        </div>
-        <div className="chat-row left">
-          <span className="chat-msg-avatar friend">{t('chatFriendAvatar')}</span>
-          <div className="chat-bubble left">{t('chatBubble3')}</div>
-        </div>
-        <div className="chat-row right">
-          <div className="chat-bubble right">{t('chatBubble4')}</div>
-          <span className="chat-msg-avatar self">{t('chatSelfAvatar')}</span>
-        </div>
-        {/* 迭代 6 先还原静态输入条，后续迭代再接入真实输入交互。 */}
-        <div className="chat-input-bar">
-          <span className="chat-input-icon">☺</span>
-          <span className="chat-input-placeholder">{t('chatInputPlaceholder')}</span>
-          <span className="chat-input-icon">📎</span>
-          <span className="chat-input-icon">📷</span>
-          <span className="chat-mic">{t('chatMic')}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
+// ChatPage组件已移至 ./components/ChatPage.jsx
 
 function DiscoverPage({ t }) {
   const cardKeys = [
