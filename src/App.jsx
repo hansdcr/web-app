@@ -33,7 +33,7 @@ function HomeSidebar({ t }) {
   )
 }
 
-function ChatSidebar({ t, onOpenProfile }) {
+function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend }) {
   return (
     <>
       <div className="sidebar-head">
@@ -45,21 +45,20 @@ function ChatSidebar({ t, onOpenProfile }) {
           +
         </button>
       </div>
-      <NavLink to="/home" className="chat-item chat-link-item" aria-label={t('chatAgentName')}>
-        <div className="avatar robot">{t('chatRobotIcon')}</div>
-        <div className="chat-meta">
-          <p className="chat-name">{t('chatAgentName')}</p>
+      {friends.map((friend) => (
+        <div
+          key={friend.id}
+          className={`chat-item ${currentFriend?.id === friend.id ? 'active' : ''}`}
+          onClick={() => onSelectFriend(friend)}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="avatar friend">{friend.avatar}</div>
+          <div className="chat-meta">
+            <p className="chat-name">{friend.name}</p>
+            <p className="chat-desc">点击开始聊天</p>
+          </div>
         </div>
-      </NavLink>
-      <div className="chat-item active">
-        <button type="button" className="avatar-trigger" onClick={onOpenProfile} aria-label={t('chatFriendName')}>
-          <div className="avatar friend">{t('chatFriendAvatar')}</div>
-        </button>
-        <div className="chat-meta">
-          <p className="chat-name">{t('chatFriendName')}</p>
-          <p className="chat-desc">{t('chatFriendPreview')}</p>
-        </div>
-      </div>
+      ))}
     </>
   )
 }
@@ -262,6 +261,17 @@ function App() {
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isPersonalOpen, setIsPersonalOpen] = useState(false)
   const location = useLocation()
+
+  // 好友列表（agent列表）
+  const [friends] = useState([
+    { id: 'agent_hans', name: 'Hans', avatar: '🤖' },
+    { id: 'agent_alice', name: 'Alice', avatar: '👩' },
+    { id: 'agent_bob', name: 'Bob', avatar: '👨' },
+  ])
+
+  // 当前选中的好友
+  const [currentFriend, setCurrentFriend] = useState(friends[0])
+
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
   const isDiscover = location.pathname === '/discover'
@@ -327,7 +337,13 @@ function App() {
         {isHome ? (
           <HomeSidebar t={t} />
         ) : isChat ? (
-          <ChatSidebar t={t} onOpenProfile={() => setIsProfileOpen(true)} />
+          <ChatSidebar
+            t={t}
+            onOpenProfile={() => setIsProfileOpen(true)}
+            friends={friends}
+            currentFriend={currentFriend}
+            onSelectFriend={setCurrentFriend}
+          />
         ) : isContacts ? (
           <ContactsSidebar t={t} />
         ) : isDiscover ? (
@@ -388,7 +404,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<HomePage t={t} />} />
-            <Route path="/chat" element={<ChatPage t={t} />} />
+            <Route path="/chat" element={<ChatPage t={t} currentFriend={currentFriend} />} />
             <Route path="/discover" element={<DiscoverPage t={t} />} />
             <Route path="/contacts" element={<ContactsPage t={t} />} />
             <Route path="/create" element={<div className="route-placeholder">{t('pageCreate')}</div>} />
