@@ -18,6 +18,39 @@ function ChatPage({ t }) {
     scrollToBottom()
   }, [messages])
 
+  // 页面加载时恢复会话
+  useEffect(() => {
+    const loadSession = async () => {
+      // 从 localStorage 获取 session_id
+      const savedSessionId = localStorage.getItem('chat_session_id')
+      console.log('从 localStorage 读取 session_id:', savedSessionId)
+
+      if (savedSessionId) {
+        setSessionId(savedSessionId)
+
+        // 加载历史消息
+        try {
+          console.log('加载历史消息...')
+          const response = await fetch(`${API_BASE_URL}/api/chat/history/${savedSessionId}`)
+          const data = await response.json()
+
+          console.log('历史消息响应:', data)
+
+          if (data.code === 200 && data.data.messages.length > 0) {
+            setMessages(data.data.messages)
+            console.log(`✓ 已加载 ${data.data.messages.length} 条历史消息`)
+          } else {
+            console.log('没有历史消息')
+          }
+        } catch (error) {
+          console.error('加载历史消息失败:', error)
+        }
+      }
+    }
+
+    loadSession()
+  }, [])
+
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return
 
@@ -29,10 +62,10 @@ function ChatPage({ t }) {
     setIsLoading(true)
 
     try {
-      console.log('发送请求到:', `${API_BASE_URL}/api/chat/`)
+      console.log('发送请求到:', `${API_BASE_URL}/api/chat`)
       console.log('请求数据:', { message: userMessage, session_id: sessionId })
 
-      const response = await fetch(`${API_BASE_URL}/api/chat/`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,6 +90,9 @@ function ChatPage({ t }) {
       // 保存session_id
       if (data.data.session_id) {
         setSessionId(data.data.session_id)
+        // 保存到 localStorage
+        localStorage.setItem('chat_session_id', data.data.session_id)
+        console.log('✓ 保存 session_id 到 localStorage:', data.data.session_id)
       }
 
       // 添加AI回复到界面
