@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
+// 直接使用后端API地址
 const API_BASE_URL = 'http://localhost:8000'
 
 function ChatPage({ t }) {
@@ -28,7 +29,10 @@ function ChatPage({ t }) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${API_BASE_URL}/chat/`, {
+      console.log('发送请求到:', `${API_BASE_URL}/api/chat/`)
+      console.log('请求数据:', { message: userMessage, session_id: sessionId })
+
+      const response = await fetch(`${API_BASE_URL}/api/chat/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,11 +43,16 @@ function ChatPage({ t }) {
         }),
       })
 
+      console.log('响应状态:', response.status)
+
       if (!response.ok) {
-        throw new Error('Network response was not ok')
+        const errorText = await response.text()
+        console.error('响应错误:', errorText)
+        throw new Error(`Network response was not ok: ${response.status}`)
       }
 
       const data = await response.json()
+      console.log('响应数据:', data)
 
       // 保存session_id
       if (data.data.session_id) {
@@ -54,7 +63,8 @@ function ChatPage({ t }) {
       setMessages(prev => [...prev, { role: 'assistant', content: data.data.message }])
     } catch (error) {
       console.error('Error sending message:', error)
-      setMessages(prev => [...prev, { role: 'assistant', content: '抱歉，发送消息失败，请重试。' }])
+      console.error('Error details:', error.message)
+      setMessages(prev => [...prev, { role: 'assistant', content: `抱歉，发送消息失败：${error.message}` }])
     } finally {
       setIsLoading(false)
     }
