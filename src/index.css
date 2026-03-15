@@ -913,6 +913,26 @@ body {
   color: #14532d;
 }
 
+.chat-bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-timestamp {
+  font-size: 10px;
+  color: #94a3b8;
+  line-height: 1;
+}
+
+.chat-timestamp.left {
+  text-align: left;
+}
+
+.chat-timestamp.right {
+  text-align: right;
+}
+
 .chat-input-bar {
   position: absolute;
   left: 16px;

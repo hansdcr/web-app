@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import ChatPage from './components/ChatPage'
@@ -269,8 +269,23 @@ function App() {
     { id: 'agent_bob', name: 'Bob', avatar: '👨' },
   ])
 
-  // 当前选中的好友
-  const [currentFriend, setCurrentFriend] = useState(friends[0])
+  // 当前选中的好友 - 从localStorage恢复
+  const [currentFriend, setCurrentFriend] = useState(() => {
+    const savedFriendId = localStorage.getItem('current_friend_id')
+    if (savedFriendId) {
+      const friend = friends.find(f => f.id === savedFriendId)
+      if (friend) {
+        return friend
+      }
+    }
+    return friends[0]
+  })
+
+  // 当切换好友时，保存到localStorage
+  const handleSelectFriend = (friend) => {
+    setCurrentFriend(friend)
+    localStorage.setItem('current_friend_id', friend.id)
+  }
 
   const isHome = location.pathname === '/home'
   const isChat = location.pathname === '/chat'
@@ -342,7 +357,7 @@ function App() {
             onOpenProfile={() => setIsProfileOpen(true)}
             friends={friends}
             currentFriend={currentFriend}
-            onSelectFriend={setCurrentFriend}
+            onSelectFriend={handleSelectFriend}
           />
         ) : isContacts ? (
           <ContactsSidebar t={t} />

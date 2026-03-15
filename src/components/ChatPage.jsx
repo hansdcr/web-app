@@ -99,8 +99,13 @@ function ChatPage({ t, currentFriend }) {
     // 清空当前好友的输入框
     setInputValues(prev => ({ ...prev, [currentFriend.id]: '' }))
 
-    // 添加用户消息到界面
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
+    // 添加用户消息到界面（包含当前时间）
+    const userMessageWithTime = {
+      role: 'user',
+      content: userMessage,
+      timestamp: new Date().toISOString()
+    }
+    setMessages(prev => [...prev, userMessageWithTime])
 
     // 设置当前好友的loading状态
     setLoadingStates(prev => ({ ...prev, [requestFriend.id]: true }))
@@ -143,7 +148,12 @@ function ChatPage({ t, currentFriend }) {
         // 如果还在同一个好友的聊天界面，直接更新消息
         console.log('✓ 当前仍在', requestFriend.name, '的聊天界面，直接显示回复')
         setSessionId(data.data.session_id)
-        setMessages(prev => [...prev, { role: 'assistant', content: data.data.message }])
+        const assistantMessageWithTime = {
+          role: 'assistant',
+          content: data.data.message,
+          timestamp: new Date().toISOString()
+        }
+        setMessages(prev => [...prev, assistantMessageWithTime])
         setLoadingStates(prev => ({ ...prev, [requestFriend.id]: false }))
       } else {
         // 如果已经切换到其他好友，不更新当前界面，但消息已保存到数据库
@@ -173,6 +183,43 @@ function ChatPage({ t, currentFriend }) {
     }
   }
 
+  // 格式化时间显示
+  const formatTime = (timestamp) => {
+    if (!timestamp) return ''
+
+    try {
+      const date = new Date(timestamp)
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
+      // 格式化时间为 HH:MM
+      const timeStr = date.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      })
+
+      // 如果是今天，只显示时间
+      if (messageDate.getTime() === today.getTime()) {
+        return timeStr
+      }
+
+      // 如果是昨天
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      if (messageDate.getTime() === yesterday.getTime()) {
+        return `昨天 ${timeStr}`
+      }
+
+      // 其他日期，显示月-日 时间
+      const dateStr = `${date.getMonth() + 1}-${date.getDate()}`
+      return `${dateStr} ${timeStr}`
+    } catch (e) {
+      return ''
+    }
+  }
+
   return (
     <div className="chat-page">
       <div className="chat-stage">
@@ -186,8 +233,15 @@ function ChatPage({ t, currentFriend }) {
               {msg.role === 'assistant' && (
                 <span className="chat-msg-avatar friend">{t('chatFriendAvatar')}</span>
               )}
-              <div className={`chat-bubble ${msg.role === 'user' ? 'right' : 'left'}`}>
-                {msg.content}
+              <div className="chat-bubble-wrapper">
+                <div className={`chat-bubble ${msg.role === 'user' ? 'right' : 'left'}`}>
+                  {msg.content}
+                </div>
+                {msg.timestamp && (
+                  <div className={`chat-timestamp ${msg.role === 'user' ? 'right' : 'left'}`}>
+                    {formatTime(msg.timestamp)}
+                  </div>
+                )}
               </div>
               {msg.role === 'user' && (
                 <span className="chat-msg-avatar self">{t('chatSelfAvatar')}</span>
