@@ -38,38 +38,51 @@ function ChatPage({ t, currentFriend }) {
 
       console.log('切换到好友:', currentFriend.id, currentFriend.name)
 
-      // 从 localStorage 获取该好友的 session_id
-      const storageKey = `chat_session_${currentUserId}_${currentFriend.id}`
-      const savedSessionId = localStorage.getItem(storageKey)
-      console.log('从 localStorage 读取 session_id:', savedSessionId)
+      // 清空当前消息和session_id，准备加载新好友的会话
+      setMessages([])
+      setSessionId(null)
 
-      if (savedSessionId) {
-        setSessionId(savedSessionId)
+      // 发送一个空请求到后端，让后端返回今天的会话（如果存在）
+      // 或者直接加载历史消息（后端会自动查找今天的会话）
+      try {
+        console.log('从后端获取今天的会话...')
+        // 通过发送一个特殊的请求来获取今天的session_id
+        // 这里我们使用一个技巧：发送一个空消息请求，后端会返回今天的session_id
+        // 但实际上我们不会真的发送消息，而是通过API获取会话列表
+        const response = await fetch(
+          `${API_BASE_URL}/api/chat/sessions?user_id=${currentUserId}&agent_id=${currentFriend.id}`
+        )
+        const data = await response.json()
 
-        // 加载历史消息
-        try {
-          console.log('加载历史消息...')
-          const response = await fetch(`${API_BASE_URL}/api/chat/history/${savedSessionId}`)
-          const data = await response.json()
+        console.log('会话列表响应:', data)
 
-          console.log('历史消息响应:', data)
+        if (data.code === 200 && data.data.sessions.length > 0) {
+          // 获取最新的会话（第一个，因为后端按时间倒序返回）
+          const latestSession = data.data.sessions[0]
+          const latestSessionId = latestSession.session_id
 
-          if (data.code === 200 && data.data.messages.length > 0) {
-            setMessages(data.data.messages)
-            console.log(`✓ 已加载 ${data.data.messages.length} 条历史消息`)
+          console.log('找到最新会话:', latestSessionId)
+          setSessionId(latestSessionId)
+
+          // 加载该会话的历史消息
+          const historyResponse = await fetch(
+            `${API_BASE_URL}/api/chat/history/${latestSessionId}`
+          )
+          const historyData = await historyResponse.json()
+
+          console.log('历史消息响应:', historyData)
+
+          if (historyData.code === 200 && historyData.data.messages.length > 0) {
+            setMessages(historyData.data.messages)
+            console.log(`✓ 已加载 ${historyData.data.messages.length} 条历史消息`)
           } else {
             console.log('没有历史消息')
-            setMessages([])
           }
-        } catch (error) {
-          console.error('加载历史消息失败:', error)
-          setMessages([])
+        } else {
+          console.log('没有历史会话，将创建新会话')
         }
-      } else {
-        // 没有历史会话，清空消息
-        console.log('没有历史会话，清空消息')
-        setSessionId(null)
-        setMessages([])
+      } catch (error) {
+        console.error('加载会话失败:', error)
       }
     }
 
@@ -124,13 +137,6 @@ function ChatPage({ t, currentFriend }) {
 
       const data = await response.json()
       console.log('响应数据:', data)
-
-      // 保存session_id到localStorage（无论当前是否还在该好友的聊天界面）
-      if (data.data.session_id) {
-        const storageKey = `chat_session_${requestUserId}_${requestFriend.id}`
-        localStorage.setItem(storageKey, data.data.session_id)
-        console.log('✓ 保存 session_id 到 localStorage:', storageKey, data.data.session_id)
-      }
 
       // 检查当前好友是否还是发送请求时的好友
       if (currentFriendRef.current?.id === requestFriend.id) {
