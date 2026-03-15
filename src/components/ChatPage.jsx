@@ -189,32 +189,36 @@ function ChatPage({ t, currentFriend }) {
 
     try {
       const date = new Date(timestamp)
+
+      // 检查日期是否有效
+      if (isNaN(date.getTime())) return ''
+
       const now = new Date()
+
+      // 计算日期差（忽略时间部分）
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
       const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      const diffDays = Math.floor((today - messageDate) / (1000 * 60 * 60 * 24))
 
-      // 格式化时间为 HH:MM
-      const timeStr = date.toLocaleTimeString('zh-CN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
+      // 格式化时间为 HH:MM（使用本地时间）
+      const hours = String(date.getHours()).padStart(2, '0')
+      const minutes = String(date.getMinutes()).padStart(2, '0')
+      const timeStr = `${hours}:${minutes}`
 
       // 如果是今天，只显示时间
-      if (messageDate.getTime() === today.getTime()) {
+      if (diffDays === 0) {
         return timeStr
       }
 
       // 如果是昨天
-      const yesterday = new Date(today)
-      yesterday.setDate(yesterday.getDate() - 1)
-      if (messageDate.getTime() === yesterday.getTime()) {
+      if (diffDays === 1) {
         return `昨天 ${timeStr}`
       }
 
       // 其他日期，显示月-日 时间
-      const dateStr = `${date.getMonth() + 1}-${date.getDate()}`
-      return `${dateStr} ${timeStr}`
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      return `${month}月${day}日 ${timeStr}`
     } catch (e) {
       return ''
     }
