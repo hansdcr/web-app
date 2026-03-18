@@ -11,6 +11,8 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [agents, setAgents] = useState([])
+  const [authType, setAuthType] = useState(null) // 'user' | 'agent'
+  const [currentAgent, setCurrentAgent] = useState(null) // agent 身份登录时的 agent 信息
 
   // 加载 agent 列表（确保预置 agent 已注册）
   const loadAgents = async () => {
@@ -31,6 +33,9 @@ export function AuthProvider({ children }) {
       if (token && savedUser) {
         setUser(savedUser)
         setIsAuthenticated(true)
+        setAuthType(storage.getAuthType() || 'user')
+        const savedAgent = storage.getAgentIdentity()
+        if (savedAgent) setCurrentAgent(savedAgent)
 
         try {
           const response = await userService.getCurrentUser()
@@ -70,6 +75,7 @@ export function AuthProvider({ children }) {
       storage.setUser(userData)
       setUser(userData)
       setIsAuthenticated(true)
+      setAuthType('user')
       // 登录后加载 agent 列表
       await loadAgents()
       return response
@@ -86,7 +92,29 @@ export function AuthProvider({ children }) {
       setUser(null)
       setIsAuthenticated(false)
       setAgents([])
+      setAuthType(null)
+      setCurrentAgent(null)
     }
+  }
+
+  // Agent 身份登录
+  const loginAsAgent = async (data) => {
+    const response = await authService.agentLogin(data)
+    if (response.code === 200) {
+      const { access_token, refresh_token, agent } = response.data
+      storage.setToken(access_token)
+      storage.setRefreshToken(refresh_token)
+      storage.setUser(agent)
+      storage.setAuthType('agent')
+      storage.setAgentIdentity(agent)
+      setUser(agent)
+      setCurrentAgent(agent)
+      setIsAuthenticated(true)
+      setAuthType('agent')
+      await loadAgents()
+      return response
+    }
+    throw new Error(response.message || 'Agent 登录失败')
   }
 
   const updateUser = (userData) => {
@@ -99,8 +127,11 @@ export function AuthProvider({ children }) {
     loading,
     isAuthenticated,
     agents,
+    authType,
+    currentAgent,
     register,
     login,
+    loginAsAgent,
     logout,
     updateUser,
   }

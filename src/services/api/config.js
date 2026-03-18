@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
   // 认证相关
   register: '/api/auth/register',
   login: '/api/auth/login',
+  agentLogin: '/api/auth/agent-login',
   logout: '/api/auth/logout',
   refresh: '/api/auth/refresh',
 

@@ -28,6 +28,15 @@ export const authService = {
     return response
   },
 
+  // Agent 登录
+  async agentLogin(data) {
+    const response = await httpClient.post(API_ENDPOINTS.agentLogin, {
+      agent_id: data.agent_id,
+      api_key: data.api_key,
+    })
+    return response
+  },
+
   // 刷新token
   async refreshToken(refreshToken) {
     const response = await httpClient.post(API_ENDPOINTS.refresh, {

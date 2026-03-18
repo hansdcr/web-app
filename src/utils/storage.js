@@ -2,6 +2,8 @@
 const TOKEN_KEY = 'auth_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
 const USER_KEY = 'user_info'
+const AUTH_TYPE_KEY = 'auth_type'
+const AGENT_IDENTITY_KEY = 'agent_identity'
 
 export const storage = {
   // Token操作
@@ -49,5 +51,18 @@ export const storage = {
     this.removeToken()
     this.removeRefreshToken()
     this.removeUser()
+    localStorage.removeItem(AUTH_TYPE_KEY)
+    localStorage.removeItem(AGENT_IDENTITY_KEY)
   },
+
+  // 认证类型
+  getAuthType() { return localStorage.getItem(AUTH_TYPE_KEY) },
+  setAuthType(type) { localStorage.setItem(AUTH_TYPE_KEY, type) },
+
+  // Agent 身份信息
+  getAgentIdentity() {
+    const v = localStorage.getItem(AGENT_IDENTITY_KEY)
+    return v ? JSON.parse(v) : null
+  },
+  setAgentIdentity(agent) { localStorage.setItem(AGENT_IDENTITY_KEY, JSON.stringify(agent)) },
 }
