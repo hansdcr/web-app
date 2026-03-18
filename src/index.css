@@ -318,6 +318,95 @@ body {
   background: #f1f5f9;
   color: var(--muted);
   cursor: pointer;
+  position: relative;
+}
+
+.sidebar-plus.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.add-friend-pop {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 220px;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-pop);
+  padding: 12px;
+  z-index: 20;
+  animation: wallet-pop-in 160ms ease-out;
+}
+
+.add-friend-pop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.add-friend-pop-head span {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.add-friend-close {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.add-friend-input {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 10px;
+}
+
+.add-friend-input:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.1);
+}
+
+.add-friend-input.has-error {
+  border-color: #ef4444;
+}
+
+.add-friend-error {
+  margin: -6px 0 8px;
+  font-size: 11px;
+  color: #ef4444;
+}
+
+.add-friend-btn {
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.add-friend-btn:hover {
+  opacity: 0.9;
 }
 
 .chat-item {

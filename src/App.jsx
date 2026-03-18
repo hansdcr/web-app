@@ -33,17 +33,74 @@ function HomeSidebar({ t }) {
   )
 }
 
-function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend }) {
+function AddFriendPopover({ t, onAdd, onClose }) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState('')
+
+  const handleAdd = () => {
+    const trimmed = name.trim()
+    if (!trimmed) {
+      setError(t('addFriendRequired'))
+      return
+    }
+    onAdd(trimmed)
+    setName('')
+    setError('')
+  }
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') handleAdd()
+    if (e.key === 'Escape') onClose()
+  }
+
+  return (
+    <div className="add-friend-pop">
+      <div className="add-friend-pop-head">
+        <span>{t('addFriendTitle')}</span>
+        <button type="button" className="add-friend-close" onClick={onClose} aria-label={t('addFriendClose')}>×</button>
+      </div>
+      <input
+        className={`add-friend-input${error ? ' has-error' : ''}`}
+        placeholder={t('addFriendPlaceholder')}
+        value={name}
+        onChange={(e) => { setName(e.target.value); setError('') }}
+        onKeyDown={handleKeyDown}
+        autoFocus
+      />
+      {error && <p className="add-friend-error">{error}</p>}
+      <button type="button" className="add-friend-btn" onClick={handleAdd}>
+        {t('addFriendConfirm')}
+      </button>
+    </div>
+  )
+}
+
+function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend, onAddFriend }) {
+  const [isAddOpen, setIsAddOpen] = useState(false)
+
+  const handleAdd = (name) => {
+    onAddFriend(name)
+    setIsAddOpen(false)
+  }
+
   return (
     <>
-      <div className="sidebar-head">
+      <div className="sidebar-head" style={{ position: 'relative' }}>
         <label className="search-box">
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
         </label>
-        <button type="button" className="sidebar-plus" aria-label={t('chatSidebarAdd')}>
+        <button
+          type="button"
+          className={`sidebar-plus${isAddOpen ? ' active' : ''}`}
+          aria-label={t('chatSidebarAdd')}
+          onClick={() => setIsAddOpen((prev) => !prev)}
+        >
           +
         </button>
+        {isAddOpen && (
+          <AddFriendPopover t={t} onAdd={handleAdd} onClose={() => setIsAddOpen(false)} />
+        )}
       </div>
       {friends.map((friend) => (
         <div
@@ -55,7 +112,7 @@ function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend 
           <div className="avatar friend">{friend.avatar}</div>
           <div className="chat-meta">
             <p className="chat-name">{friend.name}</p>
-            <p className="chat-desc">点击开始聊天</p>
+            <p className="chat-desc">{t('chatClickToChat')}</p>
           </div>
         </div>
       ))}
@@ -263,11 +320,18 @@ function App() {
   const location = useLocation()
 
   // 好友列表（agent列表）
-  const [friends] = useState([
+  const [friends, setFriends] = useState([
     { id: 'agent_hans', name: 'Hans', avatar: '🤖' },
     { id: 'agent_alice', name: 'Alice', avatar: '👩' },
     { id: 'agent_bob', name: 'Bob', avatar: '👨' },
   ])
+
+  const handleAddFriend = (name) => {
+    const id = `agent_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`
+    const avatars = ['😊', '🧑', '👤', '🙂', '😄']
+    const avatar = avatars[Math.floor(Math.random() * avatars.length)]
+    setFriends((prev) => [...prev, { id, name, avatar }])
+  }
 
   // 当前选中的好友 - 从localStorage恢复
   const [currentFriend, setCurrentFriend] = useState(() => {
@@ -358,6 +422,7 @@ function App() {
             friends={friends}
             currentFriend={currentFriend}
             onSelectFriend={handleSelectFriend}
+            onAddFriend={handleAddFriend}
           />
         ) : isContacts ? (
           <ContactsSidebar t={t} />
