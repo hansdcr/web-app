@@ -70,13 +70,17 @@ function Register() {
     setErrorMessage('')
 
     try {
-      await register({
+      console.log('Submitting registration form...')
+      const result = await register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
       })
+      console.log('Registration completed, result:', result)
+      console.log('Navigating to /home...')
       navigate('/home')
     } catch (error) {
+      console.error('Registration failed:', error)
       setErrorMessage(error.message || t('registerFailed'))
     } finally {
       setLoading(false)

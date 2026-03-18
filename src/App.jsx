@@ -319,10 +319,44 @@ function App() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated, loading, logout } = useAuth()
+  const location = useLocation()
+
+  // 所有 Hooks 必须在条件判断之前调用
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isPersonalOpen, setIsPersonalOpen] = useState(false)
-  const location = useLocation()
+
+  // 好友列表（agent列表）
+  const [friends, setFriends] = useState([
+    { id: 'agent_hans', name: 'Hans', avatar: '🤖' },
+    { id: 'agent_alice', name: 'Alice', avatar: '👩' },
+    { id: 'agent_bob', name: 'Bob', avatar: '👨' },
+  ])
+
+  const handleAddFriend = (name) => {
+    const id = `agent_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`
+    const avatars = ['😊', '🧑', '👤', '🙂', '😄']
+    const avatar = avatars[Math.floor(Math.random() * avatars.length)]
+    setFriends((prev) => [...prev, { id, name, avatar }])
+  }
+
+  // 当前选中的好友 - 从localStorage恢复
+  const [currentFriend, setCurrentFriend] = useState(() => {
+    const savedFriendId = localStorage.getItem('current_friend_id')
+    if (savedFriendId) {
+      const friend = friends.find(f => f.id === savedFriendId)
+      if (friend) {
+        return friend
+      }
+    }
+    return friends[0]
+  })
+
+  // 当切换好友时，保存到localStorage
+  const handleSelectFriend = (friend) => {
+    setCurrentFriend(friend)
+    localStorage.setItem('current_friend_id', friend.id)
+  }
 
   // 处理退出
   const handleLogout = async () => {
@@ -358,38 +392,6 @@ function App() {
         <Route path="/register" element={<Register />} />
       </Routes>
     )
-  }
-
-  // 好友列表（agent列表）
-  const [friends, setFriends] = useState([
-    { id: 'agent_hans', name: 'Hans', avatar: '🤖' },
-    { id: 'agent_alice', name: 'Alice', avatar: '👩' },
-    { id: 'agent_bob', name: 'Bob', avatar: '👨' },
-  ])
-
-  const handleAddFriend = (name) => {
-    const id = `agent_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`
-    const avatars = ['😊', '🧑', '👤', '🙂', '😄']
-    const avatar = avatars[Math.floor(Math.random() * avatars.length)]
-    setFriends((prev) => [...prev, { id, name, avatar }])
-  }
-
-  // 当前选中的好友 - 从localStorage恢复
-  const [currentFriend, setCurrentFriend] = useState(() => {
-    const savedFriendId = localStorage.getItem('current_friend_id')
-    if (savedFriendId) {
-      const friend = friends.find(f => f.id === savedFriendId)
-      if (friend) {
-        return friend
-      }
-    }
-    return friends[0]
-  })
-
-  // 当切换好友时，保存到localStorage
-  const handleSelectFriend = (friend) => {
-    setCurrentFriend(friend)
-    localStorage.setItem('current_friend_id', friend.id)
   }
 
   const isHome = location.pathname === '/home'

@@ -42,19 +42,25 @@ export function AuthProvider({ children }) {
   // 注册
   const register = async (data) => {
     try {
+      console.log('Registering user:', data.email)
       const response = await authService.register(data)
+      console.log('Register response:', response)
 
       if (response.code === 200) {
         // 注册成功后自动登录
+        console.log('Registration successful, auto-login...')
         const loginData = {
           email: data.email,
           password: data.password,
         }
-        return await login(loginData)
+        const loginResult = await login(loginData)
+        console.log('Auto-login result:', loginResult)
+        return loginResult
       }
 
       throw new Error(response.message || '注册失败')
     } catch (error) {
+      console.error('Register error:', error)
       throw error
     }
   }
@@ -62,10 +68,14 @@ export function AuthProvider({ children }) {
   // 登录
   const login = async (data) => {
     try {
+      console.log('Logging in user:', data.email)
       const response = await authService.login(data)
+      console.log('Login response:', response)
 
       if (response.code === 200) {
         const { access_token, refresh_token, user: userData } = response.data
+
+        console.log('Saving tokens and user data:', { access_token: access_token?.substring(0, 20) + '...', userData })
 
         // 保存token和用户信息
         storage.setToken(access_token)
@@ -75,11 +85,13 @@ export function AuthProvider({ children }) {
         setUser(userData)
         setIsAuthenticated(true)
 
+        console.log('Login successful, authenticated:', true)
         return response
       }
 
       throw new Error(response.message || '登录失败')
     } catch (error) {
+      console.error('Login error:', error)
       throw error
     }
   }
