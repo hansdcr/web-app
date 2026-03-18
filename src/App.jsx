@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import ChatPage from './components/ChatPage'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import { useAuth } from './contexts/AuthContext'
 
 function HomeSidebar({ t }) {
   return (
@@ -288,7 +291,7 @@ function WalletPopover({ t }) {
   )
 }
 
-function PersonalMenuPopover({ t }) {
+function PersonalMenuPopover({ t, onLogout }) {
   return (
     <section className="personal-pop">
       <div className="personal-account">
@@ -307,17 +310,55 @@ function PersonalMenuPopover({ t }) {
         <button type="button">{t('personalTerms')}</button>
         <button type="button">{t('personalPrivacy')}</button>
       </div>
-      <button type="button" className="personal-logout">{t('personalLogout')}</button>
+      <button type="button" className="personal-logout" onClick={onLogout}>{t('personalLogout')}</button>
     </section>
   )
 }
 
 function App() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const { isAuthenticated, loading, logout } = useAuth()
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isPersonalOpen, setIsPersonalOpen] = useState(false)
   const location = useLocation()
+
+  // 处理退出
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
+
+  // 如果正在加载认证状态，显示loading
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div style={{ fontSize: '48px' }}>🤖</div>
+      </div>
+    )
+  }
+
+  // 如果未登录且不在登录/注册页面，跳转到登录页
+  const publicPaths = ['/login', '/register']
+  if (!isAuthenticated && !publicPaths.includes(location.pathname)) {
+    return <Navigate to="/login" replace />
+  }
+
+  // 如果已登录且在登录/注册页面，跳转到首页
+  if (isAuthenticated && publicPaths.includes(location.pathname)) {
+    return <Navigate to="/home" replace />
+  }
+
+  // 如果在登录/注册页面，只显示页面内容，不显示导航栏
+  if (publicPaths.includes(location.pathname)) {
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+      </Routes>
+    )
+  }
 
   // 好友列表（agent列表）
   const [friends, setFriends] = useState([
@@ -406,7 +447,7 @@ function App() {
             >
               {t('personalInitial')}
             </button>
-            {isPersonalOpen ? <PersonalMenuPopover t={t} /> : null}
+            {isPersonalOpen ? <PersonalMenuPopover t={t} onLogout={handleLogout} /> : null}
           </div>
         </div>
       </aside>
@@ -483,6 +524,8 @@ function App() {
         >
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<ChatPage t={t} currentFriend={currentFriend} />} />
             <Route path="/discover" element={<DiscoverPage t={t} />} />
