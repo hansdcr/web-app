@@ -35,7 +35,7 @@ class HttpClient {
       const response = await fetch(fullURL, {
         ...options,
         headers,
-        signal: controller.abort,
+        signal: controller.signal,
       })
 
       clearTimeout(timeoutId)
