@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-
-// 直接使用后端API地址
-const API_BASE_URL = 'http://localhost:8000'
+import { useAuth } from '../contexts/AuthContext'
+import { AGENT_SERVICES } from '../services/api/config'
 
 function ChatPage({ t, currentFriend }) {
+  const { user } = useAuth()
+
+  // 根据当前好友获取对应的 agent 服务地址
+  const getAgentBaseUrl = (friendId) => {
+    return AGENT_SERVICES[friendId] || AGENT_SERVICES['agent_libai']
+  }
   const [messages, setMessages] = useState([])
   const [inputValues, setInputValues] = useState({})  // 每个好友独立的输入框内容
   const [loadingStates, setLoadingStates] = useState({})  // 每个好友独立的loading状态
@@ -11,8 +16,8 @@ function ChatPage({ t, currentFriend }) {
   const messagesEndRef = useRef(null)
   const currentFriendRef = useRef(currentFriend)  // 保存当前好友的引用
 
-  // 当前用户ID（可以从登录信息获取，这里暂时硬编码）
-  const currentUserId = 'user_001'
+  // 当前用户ID（从认证上下文获取）
+  const currentUserId = user?.id || user?.email || 'guest'
 
   // 获取当前好友的输入框内容和loading状态
   const inputValue = inputValues[currentFriend?.id] || ''
@@ -49,8 +54,9 @@ function ChatPage({ t, currentFriend }) {
         // 通过发送一个特殊的请求来获取今天的session_id
         // 这里我们使用一个技巧：发送一个空消息请求，后端会返回今天的session_id
         // 但实际上我们不会真的发送消息，而是通过API获取会话列表
+        const agentBaseUrl = getAgentBaseUrl(currentFriend.id)
         const response = await fetch(
-          `${API_BASE_URL}/api/chat/sessions?user_id=${currentUserId}&agent_id=${currentFriend.id}`
+          `${agentBaseUrl}/api/chat/sessions?user_id=${currentUserId}&agent_id=${currentFriend.id}`
         )
         const data = await response.json()
 
@@ -66,7 +72,7 @@ function ChatPage({ t, currentFriend }) {
 
           // 加载该会话的历史消息
           const historyResponse = await fetch(
-            `${API_BASE_URL}/api/chat/history/${latestSessionId}`
+            `${agentBaseUrl}/api/chat/history/${latestSessionId}`
           )
           const historyData = await historyResponse.json()
 
@@ -111,7 +117,8 @@ function ChatPage({ t, currentFriend }) {
     setLoadingStates(prev => ({ ...prev, [requestFriend.id]: true }))
 
     try {
-      console.log('发送请求到:', `${API_BASE_URL}/api/chat`)
+      const agentBaseUrl = getAgentBaseUrl(requestFriend.id)
+      console.log('发送请求到:', `${agentBaseUrl}/api/chat`)
       console.log('请求数据:', {
         message: userMessage,
         session_id: sessionId,
@@ -119,7 +126,7 @@ function ChatPage({ t, currentFriend }) {
         agent_id: requestFriend.id
       })
 
-      const response = await fetch(`${API_BASE_URL}/api/chat`, {
+      const response = await fetch(`${agentBaseUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -235,7 +242,7 @@ function ChatPage({ t, currentFriend }) {
           messages.map((msg, index) => (
             <div key={index} className={`chat-row ${msg.role === 'user' ? 'right' : 'left'}`}>
               {msg.role === 'assistant' && (
-                <span className="chat-msg-avatar friend">{t('chatFriendAvatar')}</span>
+                <span className="chat-msg-avatar friend">{currentFriend?.avatar || t('chatFriendAvatar')}</span>
               )}
               <div className="chat-bubble-wrapper">
                 <div className={`chat-bubble ${msg.role === 'user' ? 'right' : 'left'}`}>
@@ -255,7 +262,7 @@ function ChatPage({ t, currentFriend }) {
         )}
         {isLoading && (
           <div className="chat-row left">
-            <span className="chat-msg-avatar friend">{t('chatFriendAvatar')}</span>
+            <span className="chat-msg-avatar friend">{currentFriend?.avatar || t('chatFriendAvatar')}</span>
             <div className="chat-bubble left">
               <span className="typing-indicator">...</span>
             </div>

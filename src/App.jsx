@@ -78,33 +78,20 @@ function AddFriendPopover({ t, onAdd, onClose }) {
   )
 }
 
-function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend, onAddFriend }) {
-  const [isAddOpen, setIsAddOpen] = useState(false)
-
-  const handleAdd = (name) => {
-    onAddFriend(name)
-    setIsAddOpen(false)
-  }
-
+function ChatSidebar({ t, friends, currentFriend, onSelectFriend }) {
   return (
     <>
-      <div className="sidebar-head" style={{ position: 'relative' }}>
+      <div className="sidebar-head">
         <label className="search-box">
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
         </label>
-        <button
-          type="button"
-          className={`sidebar-plus${isAddOpen ? ' active' : ''}`}
-          aria-label={t('chatSidebarAdd')}
-          onClick={() => setIsAddOpen((prev) => !prev)}
-        >
-          +
-        </button>
-        {isAddOpen && (
-          <AddFriendPopover t={t} onAdd={handleAdd} onClose={() => setIsAddOpen(false)} />
-        )}
       </div>
+      {friends.length === 0 && (
+        <div style={{ padding: '16px 8px', color: '#94a3b8', fontSize: '12px', textAlign: 'center' }}>
+          加载中...
+        </div>
+      )}
       {friends.map((friend) => (
         <div
           key={friend.id}
@@ -115,7 +102,7 @@ function ChatSidebar({ t, onOpenProfile, friends, currentFriend, onSelectFriend,
           <div className="avatar friend">{friend.avatar}</div>
           <div className="chat-meta">
             <p className="chat-name">{friend.name}</p>
-            <p className="chat-desc">{t('chatClickToChat')}</p>
+            <p className="chat-desc">{friend.description || t('chatClickToChat')}</p>
           </div>
         </div>
       ))}
@@ -214,35 +201,51 @@ function ContactsSidebar({ t }) {
   )
 }
 
-function ContactsPage({ t }) {
-  const groups = [
-    { letter: 'A', items: ['Accounting Assistant', 'AI Stock Assistant'] },
-    { letter: 'F', items: ['Finance Assistant'] },
-    { letter: 'H', items: ['Health Assistant'] },
-    { letter: 'M', items: ['Market Research'] },
-    { letter: 'S', items: ['Slides Assistant'] },
-    { letter: 'T', items: ['Travel Planner'] },
-    { letter: 'W', items: ['Webpage Developer'] },
-  ]
+function ContactsPage({ t, agents }) {
+  const navigate = useNavigate()
+
+  // 按名称首字母分组
+  const groups = agents.reduce((acc, agent) => {
+    const letter = agent.name[0].toUpperCase()
+    if (!acc[letter]) acc[letter] = []
+    acc[letter].push(agent)
+    return acc
+  }, {})
+  const sortedLetters = Object.keys(groups).sort()
 
   return (
     <div className="contacts-page">
       <div className="contacts-list">
-        {groups.map((group) => (
-          <section key={group.letter} className="contacts-group">
-            <p className="contacts-letter">{group.letter}</p>
+        {sortedLetters.length === 0 && (
+          <div style={{ color: '#94a3b8', fontSize: '13px', padding: '16px' }}>暂无联系人</div>
+        )}
+        {sortedLetters.map((letter) => (
+          <section key={letter} className="contacts-group">
+            <p className="contacts-letter">{letter}</p>
             <div className="contacts-items">
-              {group.items.map((item) => (
-                <div key={item} className={`contacts-row ${item === 'Travel Planner' ? 'active' : ''}`}>
-                  <span className="contacts-row-icon">✦</span>
-                  <span>{t(`contactsItem.${item}`)}</span>
+              {groups[letter].map((agent) => (
+                <div
+                  key={agent.agent_id}
+                  className="contacts-row"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => navigate('/chat')}
+                >
+                  <span className="contacts-row-avatar">{agent.avatar || '🤖'}</span>
+                  <div className="contacts-row-info">
+                    <span className="contacts-row-name">{agent.name}</span>
+                    {agent.description && (
+                      <span className="contacts-row-desc">{agent.description}</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
           </section>
         ))}
       </div>
-      <div className="contacts-index">A F H M S T W</div>
+      {sortedLetters.length > 0 && (
+        <div className="contacts-index">{sortedLetters.join(' ')}</div>
+      )}
     </div>
   )
 }
@@ -291,14 +294,15 @@ function WalletPopover({ t }) {
   )
 }
 
-function PersonalMenuPopover({ t, onLogout }) {
+function PersonalMenuPopover({ t, onLogout, user }) {
+  const initial = user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'U'
   return (
     <section className="personal-pop">
       <div className="personal-account">
-        <div className="personal-avatar">{t('personalInitial')}</div>
+        <div className="personal-avatar">{initial}</div>
         <div>
-          <p>{t('personalAccount')}</p>
-          <span>{t('personalEmail')}</span>
+          <p>{user?.username || t('personalAccount')}</p>
+          <span>{user?.email || ''}</span>
         </div>
       </div>
       <div className="personal-menu">
@@ -318,53 +322,42 @@ function PersonalMenuPopover({ t, onLogout }) {
 function App() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { isAuthenticated, loading, logout } = useAuth()
+  const { isAuthenticated, loading, logout, agents, user } = useAuth()
   const location = useLocation()
 
-  // 所有 Hooks 必须在条件判断之前调用
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isPersonalOpen, setIsPersonalOpen] = useState(false)
 
-  // 好友列表（agent列表）
-  const [friends, setFriends] = useState([
-    { id: 'agent_hans', name: 'Hans', avatar: '🤖' },
-    { id: 'agent_alice', name: 'Alice', avatar: '👩' },
-    { id: 'agent_bob', name: 'Bob', avatar: '👨' },
-  ])
+  // 将 agents 数据转换为 friends 格式
+  const friends = agents.map((a) => ({
+    id: a.agent_id,
+    name: a.name,
+    avatar: a.avatar || '🤖',
+    description: a.description || '',
+  }))
 
-  const handleAddFriend = (name) => {
-    const id = `agent_${name.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`
-    const avatars = ['😊', '🧑', '👤', '🙂', '😄']
-    const avatar = avatars[Math.floor(Math.random() * avatars.length)]
-    setFriends((prev) => [...prev, { id, name, avatar }])
-  }
+  // 当前选中的好友
+  const [currentFriend, setCurrentFriend] = useState(null)
 
-  // 当前选中的好友 - 从localStorage恢复
-  const [currentFriend, setCurrentFriend] = useState(() => {
-    const savedFriendId = localStorage.getItem('current_friend_id')
-    if (savedFriendId) {
-      const friend = friends.find(f => f.id === savedFriendId)
-      if (friend) {
-        return friend
-      }
-    }
-    return friends[0]
-  })
+  // agents 加载完成后，恢复上次选中的好友
+  useEffect(() => {
+    if (friends.length === 0) return
+    const savedId = localStorage.getItem('current_friend_id')
+    const found = friends.find((f) => f.id === savedId)
+    setCurrentFriend(found || friends[0])
+  }, [agents])
 
-  // 当切换好友时，保存到localStorage
   const handleSelectFriend = (friend) => {
     setCurrentFriend(friend)
     localStorage.setItem('current_friend_id', friend.id)
   }
 
-  // 处理退出
   const handleLogout = async () => {
     await logout()
     navigate('/login')
   }
 
-  // 如果正在加载认证状态，显示loading
   if (loading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -373,18 +366,13 @@ function App() {
     )
   }
 
-  // 如果未登录且不在登录/注册页面，跳转到登录页
   const publicPaths = ['/login', '/register']
   if (!isAuthenticated && !publicPaths.includes(location.pathname)) {
     return <Navigate to="/login" replace />
   }
-
-  // 如果已登录且在登录/注册页面，跳转到首页
   if (isAuthenticated && publicPaths.includes(location.pathname)) {
     return <Navigate to="/home" replace />
   }
-
-  // 如果在登录/注册页面，只显示页面内容，不显示导航栏
   if (publicPaths.includes(location.pathname)) {
     return (
       <Routes>
@@ -449,23 +437,20 @@ function App() {
             >
               {t('personalInitial')}
             </button>
-            {isPersonalOpen ? <PersonalMenuPopover t={t} onLogout={handleLogout} /> : null}
+            {isPersonalOpen ? <PersonalMenuPopover t={t} onLogout={handleLogout} user={user} /> : null}
           </div>
         </div>
       </aside>
 
       <aside className="sidebar" aria-label="Conversation List">
-        {/* Home 页使用专属侧栏内容，其他页面暂保留最小占位。 */}
         {isHome ? (
           <HomeSidebar t={t} />
         ) : isChat ? (
           <ChatSidebar
             t={t}
-            onOpenProfile={() => setIsProfileOpen(true)}
             friends={friends}
             currentFriend={currentFriend}
             onSelectFriend={handleSelectFriend}
-            onAddFriend={handleAddFriend}
           />
         ) : isContacts ? (
           <ContactsSidebar t={t} />
@@ -488,11 +473,11 @@ function App() {
                   type="button"
                   className="chat-topbar-avatar-btn"
                   onClick={() => setIsProfileOpen(true)}
-                  aria-label={t('chatFriendName')}
+                  aria-label={currentFriend?.name || t('chatFriendName')}
                 >
-                  <span className="chat-topbar-avatar">{t('chatFriendAvatar')}</span>
+                  <span className="chat-topbar-avatar">{currentFriend?.avatar || t('chatFriendAvatar')}</span>
                 </button>
-                <span>{t('chatFriendName')}</span>
+                <span>{currentFriend?.name || t('chatFriendName')}</span>
               </div>
               <span className="chat-topbar-menu">...</span>
             </div>
@@ -531,7 +516,7 @@ function App() {
             <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<ChatPage t={t} currentFriend={currentFriend} />} />
             <Route path="/discover" element={<DiscoverPage t={t} />} />
-            <Route path="/contacts" element={<ContactsPage t={t} />} />
+            <Route path="/contacts" element={<ContactsPage t={t} agents={agents} />} />
             <Route path="/create" element={<div className="route-placeholder">{t('pageCreate')}</div>} />
           </Routes>
         </section>
