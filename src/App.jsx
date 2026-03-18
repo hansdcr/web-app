@@ -6,7 +6,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import { useAuth } from './contexts/AuthContext'
 
-function HomeSidebar({ t }) {
+function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCulturalAI }) {
+  const navigate = useNavigate()
   return (
     <>
       <div className="sidebar-head">
@@ -18,20 +19,32 @@ function HomeSidebar({ t }) {
           +
         </button>
       </div>
-      <div className="chat-item active">
+      <div className={`chat-item ${currentFriend === null ? 'active' : ''}`} onClick={onSelectCulturalAI} style={{ cursor: 'pointer' }}>
         <div className="avatar robot">{t('homeRobotIcon')}</div>
         <div className="chat-meta">
           <p className="chat-name">{t('homeAgentName')}</p>
           <p className="chat-desc">{t('homeAgentDesc')}</p>
         </div>
       </div>
-      <NavLink to="/chat" className="chat-item chat-link-item" aria-label={t('homeFriendName')}>
-        <div className="avatar friend">{t('homeFriendAvatar')}</div>
-        <div className="chat-meta">
-          <p className="chat-name">{t('homeFriendName')}</p>
-          <p className="chat-desc">{t('homeFriendPreview')}</p>
+      {friends.length === 0 && (
+        <div style={{ padding: '16px 8px', color: '#94a3b8', fontSize: '12px', textAlign: 'center' }}>
+          加载中...
         </div>
-      </NavLink>
+      )}
+      {friends.map((friend) => (
+        <div
+          key={friend.id}
+          className={`chat-item ${currentFriend?.id === friend.id ? 'active' : ''}`}
+          onClick={() => { onSelectFriend(friend); navigate('/chat') }}
+          style={{ cursor: 'pointer' }}
+        >
+          <div className="avatar friend">{friend.avatar}</div>
+          <div className="chat-meta">
+            <p className="chat-name">{friend.name}</p>
+            <p className="chat-desc">{friend.description || t('chatClickToChat')}</p>
+          </div>
+        </div>
+      ))}
     </>
   )
 }
@@ -78,7 +91,8 @@ function AddFriendPopover({ t, onAdd, onClose }) {
   )
 }
 
-function ChatSidebar({ t, friends, currentFriend, onSelectFriend }) {
+function ChatSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCulturalAI }) {
+  const navigate = useNavigate()
   return (
     <>
       <div className="sidebar-head">
@@ -86,6 +100,13 @@ function ChatSidebar({ t, friends, currentFriend, onSelectFriend }) {
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
         </label>
+      </div>
+      <div className={`chat-item ${currentFriend === null ? 'active' : ''}`} onClick={() => { onSelectCulturalAI(); navigate('/home') }} style={{ cursor: 'pointer' }}>
+        <div className="avatar robot">{t('homeRobotIcon')}</div>
+        <div className="chat-meta">
+          <p className="chat-name">{t('homeAgentName')}</p>
+          <p className="chat-desc">{t('homeAgentDesc')}</p>
+        </div>
       </div>
       {friends.length === 0 && (
         <div style={{ padding: '16px 8px', color: '#94a3b8', fontSize: '12px', textAlign: 'center' }}>
@@ -340,17 +361,22 @@ function App() {
   // 当前选中的好友
   const [currentFriend, setCurrentFriend] = useState(null)
 
-  // agents 加载完成后，恢复上次选中的好友
+  // agents 加载完成后，恢复上次选中的好友（没有记录则保持 null，即 Cultural AI 激活）
   useEffect(() => {
     if (friends.length === 0) return
     const savedId = localStorage.getItem('current_friend_id')
     const found = friends.find((f) => f.id === savedId)
-    setCurrentFriend(found || friends[0])
+    setCurrentFriend(found || null)
   }, [agents])
 
   const handleSelectFriend = (friend) => {
     setCurrentFriend(friend)
     localStorage.setItem('current_friend_id', friend.id)
+  }
+
+  const handleSelectCulturalAI = () => {
+    setCurrentFriend(null)
+    localStorage.removeItem('current_friend_id')
   }
 
   const handleLogout = async () => {
@@ -444,13 +470,14 @@ function App() {
 
       <aside className="sidebar" aria-label="Conversation List">
         {isHome ? (
-          <HomeSidebar t={t} />
+          <HomeSidebar t={t} friends={friends} currentFriend={currentFriend} onSelectFriend={handleSelectFriend} onSelectCulturalAI={handleSelectCulturalAI} />
         ) : isChat ? (
           <ChatSidebar
             t={t}
             friends={friends}
             currentFriend={currentFriend}
             onSelectFriend={handleSelectFriend}
+            onSelectCulturalAI={handleSelectCulturalAI}
           />
         ) : isContacts ? (
           <ContactsSidebar t={t} />
