@@ -1,13 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import ChatPage from './components/ChatPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import { useAuth } from './contexts/AuthContext'
+import { agentService } from './services/api/agentService'
+import { userService } from './services/api/userService'
 
-function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCulturalAI }) {
+function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCulturalAI, onAddFriend }) {
   const navigate = useNavigate()
+  const [showAdd, setShowAdd] = useState(false)
+  const plusRef = useRef(null)
+
+  // 点击外部关闭
+  useEffect(() => {
+    if (!showAdd) return
+    const handler = (e) => {
+      if (plusRef.current && !plusRef.current.contains(e.target)) setShowAdd(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showAdd])
+
   return (
     <>
       <div className="sidebar-head">
@@ -15,9 +30,23 @@ function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCultur
           <span className="search-icon">⌕</span>
           <input className="search-input" placeholder={t('searchPlaceholder')} aria-label={t('searchPlaceholder')} />
         </label>
-        <button type="button" className="sidebar-plus" aria-label={t('homeSidebarAdd')}>
-          +
-        </button>
+        <div ref={plusRef} style={{ position: 'relative', flexShrink: 0 }}>
+          <button
+            type="button"
+            className={`sidebar-plus${showAdd ? ' active' : ''}`}
+            aria-label={t('homeSidebarAdd')}
+            onClick={() => setShowAdd(v => !v)}
+          >
+            +
+          </button>
+          {showAdd && (
+            <AddFriendPopover
+              t={t}
+              onAdd={async (info) => { const r = await onAddFriend(info); setShowAdd(false); return r }}
+              onClose={() => setShowAdd(false)}
+            />
+          )}
+        </div>
       </div>
       <div className={`chat-item ${currentFriend === null ? 'active' : ''}`} onClick={onSelectCulturalAI} style={{ cursor: 'pointer' }}>
         <div className="avatar robot">{t('homeRobotIcon')}</div>
@@ -26,11 +55,6 @@ function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCultur
           <p className="chat-desc">{t('homeAgentDesc')}</p>
         </div>
       </div>
-      {friends.length === 0 && (
-        <div style={{ padding: '16px 8px', color: '#94a3b8', fontSize: '12px', textAlign: 'center' }}>
-          加载中...
-        </div>
-      )}
       {friends.map((friend) => (
         <div
           key={friend.id}
@@ -50,23 +74,51 @@ function HomeSidebar({ t, friends, currentFriend, onSelectFriend, onSelectCultur
 }
 
 function AddFriendPopover({ t, onAdd, onClose }) {
-  const [name, setName] = useState('')
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [searching, setSearching] = useState(false)
   const [error, setError] = useState('')
+  const [added, setAdded] = useState(null) // { name, status }
 
-  const handleAdd = () => {
-    const trimmed = name.trim()
-    if (!trimmed) {
-      setError(t('addFriendRequired'))
-      return
-    }
-    onAdd(trimmed)
-    setName('')
+  const handleSearch = async () => {
+    const q = query.trim()
+    if (!q) return
+    setSearching(true)
     setError('')
+    setResults([])
+    try {
+      const [agentRes, userRes] = await Promise.allSettled([
+        agentService.getAgents({ name: q, limit: 10 }),
+        userService.getUsers({ username: q, limit: 10 }),
+      ])
+      const agents = (agentRes.status === 'fulfilled' ? agentRes.value.data?.items ?? [] : [])
+        .map(a => ({ id: a.id, agent_id: a.agent_id, name: a.name, avatar: a.avatar || '🤖', desc: a.description || '', type: 'agent' }))
+      const users = (userRes.status === 'fulfilled' ? userRes.value.data?.items ?? [] : [])
+        .map(u => ({ id: u.id, name: u.username || u.email, avatar: u.avatar || '👤', desc: u.email || '', type: 'user' }))
+      const all = [...agents, ...users]
+      if (all.length === 0) setError('未找到匹配的用户或智能体')
+      else setResults(all)
+    } catch {
+      setError('搜索失败，请重试')
+    } finally {
+      setSearching(false)
+    }
   }
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleAdd()
-    if (e.key === 'Escape') onClose()
+  const handleAdd = async (item) => {
+    setError('')
+    try {
+      const result = await onAdd({
+        targetType: item.type,
+        targetId: item.id,
+        targetName: item.name,
+        targetAvatar: item.avatar,
+        targetDesc: item.desc,
+      })
+      setAdded({ name: item.name, status: result?.status })
+    } catch (e) {
+      setError(e.message || '添加失败')
+    }
   }
 
   return (
@@ -75,18 +127,44 @@ function AddFriendPopover({ t, onAdd, onClose }) {
         <span>{t('addFriendTitle')}</span>
         <button type="button" className="add-friend-close" onClick={onClose} aria-label={t('addFriendClose')}>×</button>
       </div>
-      <input
-        className={`add-friend-input${error ? ' has-error' : ''}`}
-        placeholder={t('addFriendPlaceholder')}
-        value={name}
-        onChange={(e) => { setName(e.target.value); setError('') }}
-        onKeyDown={handleKeyDown}
-        autoFocus
-      />
-      {error && <p className="add-friend-error">{error}</p>}
-      <button type="button" className="add-friend-btn" onClick={handleAdd}>
-        {t('addFriendConfirm')}
-      </button>
+      {added ? (
+        <div className="add-friend-success">
+          {added.status === 'pending' ? `已向 ${added.name} 发送好友请求` : `已添加 ${added.name}`}
+        </div>
+      ) : (
+        <>
+          <div className="add-friend-search-row">
+            <input
+              className={`add-friend-input${error ? ' has-error' : ''}`}
+              placeholder={t('addFriendPlaceholder')}
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setError('') }}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); if (e.key === 'Escape') onClose() }}
+              autoFocus
+            />
+            <button type="button" className="add-friend-search-btn" onClick={handleSearch} disabled={searching}>
+              {searching ? '…' : '搜索'}
+            </button>
+          </div>
+          {error && <p className="add-friend-error">{error}</p>}
+          {results.length > 0 && (
+            <div className="add-friend-results">
+              {results.map(item => (
+                <div key={item.id} className="add-friend-result-row">
+                  <span className="add-friend-result-avatar">{item.avatar}</span>
+                  <div className="add-friend-result-info">
+                    <p>{item.name}</p>
+                    <span>{item.desc}</span>
+                  </div>
+                  <button type="button" className="add-friend-result-btn" onClick={() => handleAdd(item)}>
+                    {item.type === 'agent' ? '添加' : '申请'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </div>
   )
 }
@@ -206,65 +284,86 @@ function DiscoverPage({ t }) {
   )
 }
 
-function ContactsSidebar({ t }) {
+function ContactsSidebar({ t, pendingCount }) {
   return (
     <div className="contacts-sidebar">
       <div className="contacts-sidebar-head">
         <h2>{t('contactsTitle')}</h2>
-        <button type="button" aria-label={t('contactsAdd')}>+</button>
       </div>
       <div className="contacts-sidebar-tabs">
-        <button type="button" className="active">{t('contactsTabAgents')}</button>
-        <button type="button">{t('contactsTabFriends')}</button>
-        <button type="button">{t('contactsTabRequests')}</button>
+        <button type="button" className="active">{t('contactsTabFriends')}</button>
+        <button type="button">
+          {t('contactsTabRequests')}
+          {pendingCount > 0 && <span style={{ marginLeft: '4px', background: '#ef4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '11px' }}>{pendingCount}</span>}
+        </button>
       </div>
     </div>
   )
 }
 
-function ContactsPage({ t, agents }) {
+function ContactsPage({ t, friends, pendingRequests }) {
   const navigate = useNavigate()
+  const [tab, setTab] = useState('friends')
 
-  // 按名称首字母分组
-  const groups = agents.reduce((acc, agent) => {
-    const letter = agent.name[0].toUpperCase()
+  const groups = friends.reduce((acc, f) => {
+    const letter = (f.name || '?')[0].toUpperCase()
     if (!acc[letter]) acc[letter] = []
-    acc[letter].push(agent)
+    acc[letter].push(f)
     return acc
   }, {})
   const sortedLetters = Object.keys(groups).sort()
 
   return (
     <div className="contacts-page">
-      <div className="contacts-list">
-        {sortedLetters.length === 0 && (
-          <div style={{ color: '#94a3b8', fontSize: '13px', padding: '16px' }}>暂无联系人</div>
-        )}
-        {sortedLetters.map((letter) => (
-          <section key={letter} className="contacts-group">
-            <p className="contacts-letter">{letter}</p>
-            <div className="contacts-items">
-              {groups[letter].map((agent) => (
-                <div
-                  key={agent.agent_id}
-                  className="contacts-row"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => navigate('/chat')}
-                >
-                  <span className="contacts-row-avatar">{agent.avatar || '🤖'}</span>
-                  <div className="contacts-row-info">
-                    <span className="contacts-row-name">{agent.name}</span>
-                    {agent.description && (
-                      <span className="contacts-row-desc">{agent.description}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        ))}
+      <div style={{ display: 'flex', gap: '8px', padding: '0 0 12px 0', borderBottom: '1px solid #f1f5f9', marginBottom: '8px' }}>
+        <button type="button" onClick={() => setTab('friends')} style={{ fontWeight: tab === 'friends' ? 600 : 400, color: tab === 'friends' ? '#22c55e' : '#64748b', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}>{t('contactsTabFriends')}</button>
+        <button type="button" onClick={() => setTab('pending')} style={{ fontWeight: tab === 'pending' ? 600 : 400, color: tab === 'pending' ? '#22c55e' : '#64748b', background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px' }}>
+          {t('contactsTabRequests')}
+          {pendingRequests.length > 0 && <span style={{ marginLeft: '4px', background: '#ef4444', color: '#fff', borderRadius: '10px', padding: '0 5px', fontSize: '11px' }}>{pendingRequests.length}</span>}
+        </button>
       </div>
-      {sortedLetters.length > 0 && (
+      <div className="contacts-list">
+        {tab === 'friends' && (
+          <>
+            {sortedLetters.length === 0 && (
+              <div style={{ color: '#94a3b8', fontSize: '13px', padding: '16px' }}>暂无联系人</div>
+            )}
+            {sortedLetters.map((letter) => (
+              <section key={letter} className="contacts-group">
+                <p className="contacts-letter">{letter}</p>
+                <div className="contacts-items">
+                  {groups[letter].map((f) => (
+                    <div key={f.id} className="contacts-row" style={{ cursor: 'pointer' }} onClick={() => navigate('/chat')}>
+                      <span className="contacts-row-avatar">{f.avatar}</span>
+                      <div className="contacts-row-info">
+                        <span className="contacts-row-name">{f.name}</span>
+                        {f.description && <span className="contacts-row-desc">{f.description}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </>
+        )}
+        {tab === 'pending' && (
+          <>
+            {pendingRequests.length === 0 && (
+              <div style={{ color: '#94a3b8', fontSize: '13px', padding: '16px' }}>暂无待处理请求</div>
+            )}
+            {pendingRequests.map((req) => (
+              <div key={req.targetId} className="contacts-row" style={{ cursor: 'default' }}>
+                <span className="contacts-row-avatar">{req.targetAvatar}</span>
+                <div className="contacts-row-info">
+                  <span className="contacts-row-name">{req.targetName}</span>
+                  <span className="contacts-row-desc" style={{ color: '#f59e0b' }}>等待对方同意</span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+      {tab === 'friends' && sortedLetters.length > 0 && (
         <div className="contacts-index">{sortedLetters.join(' ')}</div>
       )}
     </div>
@@ -343,31 +442,23 @@ function PersonalMenuPopover({ t, onLogout, user }) {
 function App() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const { isAuthenticated, loading, logout, agents, user } = useAuth()
+  const { isAuthenticated, loading, logout, friends, pendingRequests, addFriend, user } = useAuth()
   const location = useLocation()
 
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [isWalletOpen, setIsWalletOpen] = useState(false)
   const [isPersonalOpen, setIsPersonalOpen] = useState(false)
 
-  // 将 agents 数据转换为 friends 格式
-  const friends = agents.map((a) => ({
-    id: a.agent_id,
-    name: a.name,
-    avatar: a.avatar || '🤖',
-    description: a.description || '',
-  }))
-
   // 当前选中的好友
   const [currentFriend, setCurrentFriend] = useState(null)
 
-  // agents 加载完成后，恢复上次选中的好友（没有记录则保持 null，即 Cultural AI 激活）
+  // friends 加载完成后，恢复上次选中的好友
   useEffect(() => {
     if (friends.length === 0) return
     const savedId = localStorage.getItem('current_friend_id')
     const found = friends.find((f) => f.id === savedId)
     setCurrentFriend(found || null)
-  }, [agents])
+  }, [friends])
 
   const handleSelectFriend = (friend) => {
     setCurrentFriend(friend)
@@ -377,6 +468,10 @@ function App() {
   const handleSelectCulturalAI = () => {
     setCurrentFriend(null)
     localStorage.removeItem('current_friend_id')
+  }
+
+  const handleAddFriend = async (info) => {
+    return await addFriend(info)
   }
 
   const handleLogout = async () => {
@@ -470,7 +565,7 @@ function App() {
 
       <aside className="sidebar" aria-label="Conversation List">
         {isHome ? (
-          <HomeSidebar t={t} friends={friends} currentFriend={currentFriend} onSelectFriend={handleSelectFriend} onSelectCulturalAI={handleSelectCulturalAI} />
+          <HomeSidebar t={t} friends={friends} currentFriend={currentFriend} onSelectFriend={handleSelectFriend} onSelectCulturalAI={handleSelectCulturalAI} onAddFriend={handleAddFriend} />
         ) : isChat ? (
           <ChatSidebar
             t={t}
@@ -480,7 +575,7 @@ function App() {
             onSelectCulturalAI={handleSelectCulturalAI}
           />
         ) : isContacts ? (
-          <ContactsSidebar t={t} />
+          <ContactsSidebar t={t} pendingCount={pendingRequests.length} />
         ) : isDiscover ? (
           <></>
         ) : (
@@ -543,7 +638,7 @@ function App() {
             <Route path="/home" element={<HomePage t={t} />} />
             <Route path="/chat" element={<ChatPage t={t} currentFriend={currentFriend} />} />
             <Route path="/discover" element={<DiscoverPage t={t} />} />
-            <Route path="/contacts" element={<ContactsPage t={t} agents={agents} />} />
+            <Route path="/contacts" element={<ContactsPage t={t} friends={friends} pendingRequests={pendingRequests} />} />
             <Route path="/create" element={<div className="route-placeholder">{t('pageCreate')}</div>} />
           </Routes>
         </section>
